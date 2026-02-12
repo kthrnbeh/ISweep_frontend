@@ -431,76 +431,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 //-----------------------------------------------------
-//  INDEX & HELP PAGE DEMO
+//  INDEX & HELP PAGE DEMO (REMOVED FOR MARKETING-ONLY HOME)
 //-----------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const checkBtn = document.getElementById("checkSubtitleBtn"); // This grabs the test button so we can run the subtitle filter demo when clicked.
-  const subtitleInput = document.getElementById("subtitleInput"); // This references the subtitle text box so we can read what the user typed.
-  const decisionOutput = document.getElementById("decisionOutput"); // This points to the output area so we can show pass/fail messages.
-  const broomIcon = document.getElementById("broomIcon"); // This finds the broom badge so we can flash it when filtering triggers.
-  const demoVideo = document.getElementById("demoVideo"); // This locates the single demo video so play events can show the broom overlay.
-
-  if (checkBtn && subtitleInput && decisionOutput) { // This ensures the filter demo only runs when all required elements exist, preventing null errors on other pages.
-    checkBtn.addEventListener("click", () => { // This listens for clicks so we can process the user's subtitle input on demand.
-      const text = subtitleInput.value.trim().toLowerCase(); // This normalizes the user text so keyword matching works reliably regardless of casing.
-      if (!text) { // This guards against empty input so we don't run checks with no data.
-        decisionOutput.textContent = "(Enter a subtitle line to test ISweep)"; // This prompts the user to type something so the demo has content to scan.
-        return; // This exits early because there is nothing to filter yet.
-      }
-
-      const filteringEnabled = isFilteringEnabled(); // This checks the current plan so we only simulate filtering when the plan allows it.
-
-      if (!filteringEnabled) { // This handles plans without filtering so users know why actions are blocked.
-        decisionOutput.textContent =
-          "ISweep Filtering is DISABLED on your current plan.\nUpgrade to Flexible or Full plan to enable filtering."; // This message tells users to upgrade because filtering logic stays off on restricted plans.
-        return; // This stops further checks because filtering is intentionally disabled.
-      }
-
-      const blockedWords = [ // This array lists demo trigger words so the filter can flag them in the sample text.
-        "badword", // This entry represents a placeholder profanity so the detection demo has a clear hit.
-        "profanity", // This entry broadens the sample list so multiple triggers are possible.
-        "swear", // This entry gives another common word to catch in the demo.
-        "curse", // This entry expands coverage for varied language in the test.
-        "hell", // This entry captures lighter profanity so users see nuanced detection.
-        "damn", // This entry provides an additional mild word for the filter to find.
-        "crap", // This entry rounds out the demo list to show multiple detections.
-      ];
-      let foundWords = []; // This array collects any blocked words that appear so we can display them back to the user.
-      blockedWords.forEach((word) => { // This iterates through every sample word so we can compare each one against the input.
-        if (text.includes(word)) { // This checks whether the current word exists in the input so we know when to flag it.
-          foundWords.push(word); // This records the detected word so we can list all hits in the output message.
-        } // This closes the condition that tracks individual blocked word matches.
-      }); // This closes the loop that scans for all blocked words in the user text.
-
-      if (foundWords.length > 0) { // This branch handles the case where at least one blocked word was found so we can simulate an action.
-        decisionOutput.textContent = `🧹 ISweep DETECTED: ${foundWords.join(", "
-        )}\nAction: MUTE\nDuration: 5 seconds`; // This message lists the detected words and shows the pretend mute action length so users see what would happen.
-        if (broomIcon) { // This guard makes sure the overlay exists before we try to show it, preventing errors on pages without the icon.
-          broomIcon.style.display = "block"; // This makes the broom badge visible to signal the filter activated.
-          setTimeout(() => { // This sets a timer so the icon hides itself automatically after a short demo window.
-            broomIcon.style.display = "none"; // This hides the broom badge so the UI returns to normal after the alert.
-          }, 3000); // This keeps the badge visible for 3 seconds so users have time to notice it.
-        } // This closes the broomIcon existence guard so we only manipulate it when present.
-      } else { // This branch runs when no blocked words were found so we can reassure the user.
-        decisionOutput.textContent =
-          "✓ ISweep PASSED: No blocked content detected.\nAction: PLAY"; // This success message confirms nothing was flagged and playback would continue.
-      } // This closes the detected/clean branching so the demo always produces a clear outcome.
-    }); // This closes the click event listener setup for the subtitle check button.
-
-    subtitleInput.addEventListener("keypress", (e) => { // This watches for Enter presses so keyboard users can run the demo quickly.
-      if (e.key === "Enter") { // This checks for the Enter key so only the intended key triggers the action.
-        checkBtn.click(); // This reuses the click handler so the logic stays in one place for both mouse and keyboard input.
-      } // This closes the Enter key check to avoid triggering on other keys.
-    }); // This closes the keypress listener on the subtitle input field.
-  } // This closes the guard that ensures the subtitle demo elements exist before wiring events.
-
-  if (demoVideo && broomIcon) { // This ensures video behavior only attaches when both the video and overlay exist, guarding against null references on pages without the demo.
-    demoVideo.addEventListener("play", () => { // This listens for the video starting so we can show the broom badge during playback.
-      broomIcon.style.display = "block"; // This shows the broom badge as soon as the demo video plays to mimic filtering feedback.
-      setTimeout(() => broomIcon.style.display = "none", 5000); // This hides the badge after 5 seconds so the overlay does not stay on screen too long.
-    }); // This closes the play event listener setup for the demo video.
-  } // This closes the guard around the demo video behavior to keep the script safe on pages without the elements.
-}); // This closes the DOMContentLoaded handler that wires the demo interactions after the page is ready.
+// Demo wiring removed because the subtitle test and broom overlay were stripped from the homepage to keep it marketing-only with a single hero video. // This comment documents the removal so future readers know why no demo wiring remains and prevents confusion about missing elements.
 
 //-----------------------------------------------------
 //  HELP PAGE: CONTACT FORM
