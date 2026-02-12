@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account | ISweep</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/site-plan.css" />
+
+  <!-- Global JS for theme + plan selection -->
+  <script src="main.js" defer></script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-box">
+        <img src="images/ISweep.png" alt="ISweep logo" />
+        <strong class="brand">ISweep</strong>
+      </div>
+
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="Account.html" class="active">Account</a>
+        <a href="Plans.html">Plans</a>
+        <a href="Settings.html">Settings</a>
+        <a href="Help.html">Help</a>
+      </nav>
+
+      <!-- Single Dark Mode button -->
+      <button id="themeBtn" class="theme-toggle">
+        Dark Mode
+      </button>
+    </div>
+  </header>
+
+  <main class="account-page container">
+    <h1>My Account</h1>
+    <p class="subtitle">Manage your personal info, subscription, devices, and security.</p>
+
+    <!-- Profile Section -->
+    <section class="card">
+      <h2>Profile</h2>
+
+      <form class="profile-form">
+        <!-- NAME -->
+        <div class="item-row">
+          <div>
+            <label>
+              <strong>Name</strong>
+              <input
+                class="profile-input"
+                type="text"
+                name="fullName"
+                placeholder="Add"
+                required
+              />
+            </label>
+          </div>
+          <button type="submit">Edit</button>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="item-row">
+          <div>
+            <label>
+              <strong>Email</strong>
+              <input
+                class="profile-input"
+                type="email"
+                name="email"
+                placeholder="Add"
+                required
+              />
+            </label>
+          </div>
+          <button type="submit">Edit</button>
+        </div>
+
+        <!-- MOBILE NUMBER -->
+        <div class="item-row">
+          <div>
+            <label>
+              <strong>Mobile Number</strong>
+              <input
+                class="profile-input"
+                type="tel"
+                name="phone"
+                placeholder="Add"
+                required
+                pattern="[0-9]{10}"
+              />
+            </label>
+          </div>
+          <button type="submit">Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Address Section -->
+    <section class="card">
+      <h2>Address</h2>
+      <form class="profile-form">
+        <div class="item-row">
+          <div>
+            <label>
+              <strong>Home Address</strong>
+              <input
+                class="profile-input"
+                type="text"
+                name="address"
+                placeholder="Add"
+                required
+              />
+            </label>
+          </div>
+          <button type="submit">Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Payment Section -->
+    <section class="card">
+      <h2>Payment</h2>
+      <form class="profile-form">
+        <div class="item-row">
+          <div>
+            <label>
+              <strong>Payment Method</strong>
+              <input
+                class="profile-input"
+                type="text"
+                name="payment"
+                placeholder="Add"
+                required
+              />
+            </label>
+          </div>
+          <button type="submit">Update</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Subscription Section -->
+    <section class="card">
+      <h2>Your Plan</h2>
+
+      <form class="profile-form">
+        <div class="item-row">
+          <div>
+            <label>
+              <strong>Current Plan</strong>
+              <input 
+                class="profile-input"
+                type="text"
+                name="plan"
+                placeholder="No plan selected yet"
+                readonly
+              />
+            </label>
+          </div>
+          <button type="submit">Manage Plan</button>
+        </div>
+      </form>
+
+      <p>Your current plan: <strong id="current-plan-display"></strong></p>
+    </section>
+
+    <!-- Device Management -->
+    <section class="card">
+      <h2>Devices</h2>
+      <div class="item-row">
+        <div>
+          <strong>Samsung Smart TV</strong>
+          <p>Living Room</p>
+        </div>
+        <button>Remove</button>
+      </div>
+      <button class="secondary-btn">Add Device</button>
+    </section>
+
+    <!-- Security -->
+    <section class="card">
+      <h2>Security</h2>
+      <button>Change Password</button>
+      <button>Enable 2-Step Verification</button>
+    </section>
+
+    <!-- Support -->
+    <section class="card">
+      <h2>Support</h2>
+      <button>Contact Support</button>
+      <button>Visit Help Center</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 ISweep Inc. All rights reserved.</p>
+  </footer>
+</body>
+</html>
