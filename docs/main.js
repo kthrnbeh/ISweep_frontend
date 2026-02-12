@@ -154,7 +154,6 @@ if (signInForm) {
     authState.set({ name: payload.email.split('@')[0] || 'User', email: payload.email, token: result.token });
     syncAuthUI();
     closeAuth();
-    if (dropdownMenu) dropdownMenu.classList.remove('show');
   });
 }
 
@@ -173,7 +172,6 @@ if (createAccountForm) {
     authState.set({ name: payload.name || 'New user', email: payload.email, token: result.token });
     syncAuthUI();
     closeAuth();
-    if (dropdownMenu) dropdownMenu.classList.remove('show');
   });
 }
 
