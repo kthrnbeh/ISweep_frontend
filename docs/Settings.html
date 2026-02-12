@@ -96,45 +96,43 @@
   </header>
 
   <!-- Main Settings Content -->
-  <main class="account-page container">
-    <!-- Main content area. 
-         class="account-page" for page-specific styling,
-         class="container" keeps content centered and sets max width. -->
+  <main class="account-page container" style="display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; align-items: start;"> <!-- This grid creates a main column plus a right contextual panel to mimic a control center without changing colors. -->
 
-    <h1>Settings</h1>
-    <!-- Main heading that tells the user they’re on the Settings page. -->
+    <section style="display: grid; gap: 1rem;"> <!-- This column stacks primary settings cards to keep the layout organized. -->
 
-    <p class="subtitle">
-      <!-- Subtitle explaining what the settings affect. -->
-
-      Choose how ISweep filters content, responds to media, and keeps your experience safe.
-    </p>
-
-    <!-- CONTENT FILTERS -->
-    <section class="card">
-      <!-- Card-shaped block for Content Filters section (box with padding and shadow). -->
-
-      <h2>Content Filters</h2>
-      <!-- Section heading for what types of content get filtered. -->
-
-        <form class="profile-form" id="contentFiltersForm">
-        <!-- Form grouping the filter checkboxes. 
-             In a full app, you'd handle submission with JS or server. -->
-
-        <div class="item-row">
-          <!-- Row layout: text + checkboxes on left, Save button on right. -->
-
+      <header class="card" style="padding: 1.1rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: center;"> <!-- This status header surfaces observer mode and active filters to feel like a dashboard bar. -->
+        <div style="display: flex; align-items: center; gap: 0.6rem;"> <!-- This row shows observer mode state. -->
+          <span style="width: 10px; height: 10px; border-radius: 999px; background: #22c55e;"></span> <!-- This dot signals observer mode is on. -->
           <div>
-            <!-- Container for the filter labels and checkboxes. -->
+            <strong>Observer Mode</strong> <!-- This label names the monitoring state. -->
+            <p style="margin: 0; color: #475569;">On</p> <!-- This text shows the current observer mode status. -->
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.6rem; justify-content: flex-end;"> <!-- This row summarizes active filters. -->
+          <span style="padding: 0.35rem 0.65rem; border-radius: 999px; background: #e0f2fe; color: #075985; font-weight: 700;">3 Active</span> <!-- This badge highlights how many filters are active to reinforce control awareness. -->
+          <span style="color: #475569;">Filters</span> <!-- This label clarifies the badge meaning. -->
+        </div>
+      </header>
 
-            <strong>Filter Categories</strong>
-            <!-- Bold label for the group of filters. -->
+      <h1 style="margin: 0;">Settings</h1> <!-- This heading labels the main column clearly. -->
+      <p class="subtitle" style="margin-top: 0;">Choose how ISweep filters content, responds to media, and keeps your experience safe.</p> <!-- This subtitle keeps context while fitting the new layout. -->
 
-            <p>Select what you want ISweep to catch and manage.</p>
-            <!-- Short explanation text. -->
+      <!-- CONTENT FILTERS -->
+      <section class="card"> <!-- Card-shaped block for Content Filters section (box with padding and shadow). -->
 
-            <label>
-              <!-- Label wraps the checkbox and text so clicking text toggles checkbox. -->
+        <h2>Content Filters</h2> <!-- Section heading for what types of content get filtered. -->
+
+        <form class="profile-form" id="contentFiltersForm"> <!-- Form grouping the filter checkboxes. In a full app, you'd handle submission with JS or server. -->
+
+        <div class="item-row"> <!-- Row layout: text + checkboxes on left, Save button on right. -->
+
+          <div> <!-- Container for the filter labels and checkboxes. -->
+
+            <strong>Filter Categories</strong> <!-- Bold label for the group of filters. -->
+
+            <p>Select what you want ISweep to catch and manage.</p> <!-- Short explanation text. -->
+
+            <label> <!-- Label wraps the checkbox and text so clicking text toggles checkbox. -->
 
               <input type="checkbox" name="filter-profanity" checked />
               <!-- Checkbox to enable/disable filtering profanity.
@@ -176,183 +174,133 @@
             </label>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- Button that submits this form.
-               A full implementation would:
-                 - prevent default submission in JS,
-                 - collect checkbox values,
-                 - save them to backend or localStorage as user’s filter prefs. -->
+          <button type="submit">Save</button> <!-- Button that submits this form. A full implementation would prevent default submission in JS, collect checkbox values, and save them to backend or localStorage as user’s filter prefs. -->
         </div>
       </form>
     </section>
 
     <!-- ACTIONS (MUTE / SKIP / FAST-FORWARD) -->
-    <section class="card">
-      <!-- Card controlling *what* ISweep should do when it detects each category. -->
+    <section class="card"> <!-- Card controlling *what* ISweep should do when it detects each category. -->
 
-      <h2>Filter Actions</h2>
-      <!-- Section heading for filter behavior (mute/skip/FF/log). -->
+      <h2>Filter Actions</h2> <!-- Section heading for filter behavior (mute/skip/FF/log). -->
 
-       <form class="profile-form" id="filterActionsForm">
-        <!-- Form for all action settings. Could be per-category Save or one big save. -->
+       <form class="profile-form" id="filterActionsForm"> <!-- Form for all action settings. Could be per-category Save or one big save. -->
 
         <!-- Profanity action -->
-        <div class="item-row">
-          <!-- Row for profanity behavior + Save button. -->
+        <div class="item-row"> <!-- Row for profanity behavior + Save button. -->
 
           <div>
-            <strong>Profanity</strong>
-            <!-- Label naming the category. -->
+            <strong>Profanity</strong> <!-- Label naming the category. -->
 
-            <p>What should ISweep do when it hears profanity?</p>
-            <!-- Description of the setting. -->
+            <p>What should ISweep do when it hears profanity?</p> <!-- Description of the setting. -->
 
-            <select name="action-profanity" required>
-              <!-- Drop-down to choose how to respond to profanity.
+            <select name="action-profanity" required> <!-- Drop-down to choose how to respond to profanity.
                    name="action-profanity": key when we submit or process the form. -->
 
-              <option value="mute" selected>Mute audio only</option>
-              <!-- Default action: audio only is muted. (No skipping.) -->
+              <option value="mute" selected>Mute audio only</option> <!-- Default action: audio only is muted. (No skipping.) -->
 
-              <option value="skip">Skip the scene</option>
-              <!-- Alternative: jump ahead past the scene. -->
+              <option value="skip">Skip the scene</option> <!-- Alternative: jump ahead past the scene. -->
 
-              <option value="fast-forward">Fast-forward 10 seconds</option>
-              <!-- Alternative: auto fast-forward a fixed duration. -->
+              <option value="fast-forward">Fast-forward 10 seconds</option> <!-- Alternative: auto fast-forward a fixed duration. -->
 
-              <option value="log-only">Just log it (no action)</option>
-              <!-- Alternative: do nothing to the video, just record that it happened. -->
+              <option value="log-only">Just log it (no action)</option> <!-- Alternative: do nothing to the video, just record that it happened. -->
             </select>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- Saves profanity action setting (in a real app).
-               For now, just a visual "Save" button; behavior handled by JS later. -->
+          <button type="submit">Save</button> <!-- Saves profanity action setting (in a real app). For now, just a visual "Save" button; behavior handled by JS later. -->
         </div>
 
         <!-- Sexual content action -->
-        <div class="item-row">
-          <!-- Row for sexual content behavior. -->
+        <div class="item-row"> <!-- Row for sexual content behavior. -->
 
           <div>
-            <strong>Sexual Content</strong>
-            <!-- Label for this category. -->
+            <strong>Sexual Content</strong> <!-- Label for this category. -->
 
-            <p>Choose how ISweep responds to sexual content.</p>
-            <!-- Explanation text. -->
+            <p>Choose how ISweep responds to sexual content.</p> <!-- Explanation text. -->
 
-            <select name="action-sexual" required>
-              <!-- Drop-down of possible actions for sexual content. -->
+            <select name="action-sexual" required> <!-- Drop-down of possible actions for sexual content. -->
 
-              <option value="skip" selected>Skip the scene</option>
-              <!-- Default: skip entire scene when sexual content is detected. -->
+              <option value="skip" selected>Skip the scene</option> <!-- Default: skip entire scene when sexual content is detected. -->
 
-              <option value="fast-forward">Fast-forward 30 seconds</option>
-              <!-- Alternative: jump forward a bit. -->
+              <option value="fast-forward">Fast-forward 30 seconds</option> <!-- Alternative: jump forward a bit. -->
 
-              <option value="mute">Mute audio only</option>
-              <!-- Alternative: only mute audio, leave video shown. -->
+              <option value="mute">Mute audio only</option> <!-- Alternative: only mute audio, leave video shown. -->
 
-              <option value="log-only">Just log it (no action)</option>
-              <!-- Alternative: quietly log the event but don’t interfere. -->
+              <option value="log-only">Just log it (no action)</option> <!-- Alternative: quietly log the event but don’t interfere. -->
             </select>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- Button to save sexual content action preference. -->
+          <button type="submit">Save</button> <!-- Button to save sexual content action preference. -->
         </div>
 
         <!-- Violence action -->
-        <div class="item-row">
-          <!-- Row for violence behavior. -->
+        <div class="item-row"> <!-- Row for violence behavior. -->
 
           <div>
-            <strong>Violence</strong>
-            <!-- Label for violence category. -->
+            <strong>Violence</strong> <!-- Label for violence category. -->
 
-            <p>How strict do you want ISweep to be with violence?</p>
-            <!-- Explanation text. -->
+            <p>How strict do you want ISweep to be with violence?</p> <!-- Explanation text. -->
 
-            <select name="action-violence" required>
-              <!-- Drop-down for violence settings. -->
+            <select name="action-violence" required> <!-- Drop-down for violence settings. -->
 
-              <option value="mute">Mute audio only</option>
-              <!-- Option: only mute sound. -->
+              <option value="mute">Mute audio only</option> <!-- Option: only mute sound. -->
 
-              <option value="skip" selected>Skip intense scenes</option>
-              <!-- Default: skip scenes flagged as intense/gory/etc. -->
+              <option value="skip" selected>Skip intense scenes</option> <!-- Default: skip scenes flagged as intense/gory/etc. -->
 
-              <option value="fast-forward">Fast-forward 15 seconds</option>
-              <!-- Option: jump ahead by a fixed time. -->
+              <option value="fast-forward">Fast-forward 15 seconds</option> <!-- Option: jump ahead by a fixed time. -->
 
-              <option value="log-only">Just log it (no action)</option>
-              <!-- Option: do nothing but record it in logs. -->
+              <option value="log-only">Just log it (no action)</option> <!-- Option: do nothing but record it in logs. -->
             </select>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- Saves chosen violence behavior (once wired to JS/backend). -->
+          <button type="submit">Save</button> <!-- Saves chosen violence behavior (once wired to JS/backend). -->
         </div>
       </form>
     </section>
 
     <!-- SENSITIVITY -->
-    <section class="card">
-      <!-- Card for overall strictness of filtering. -->
+    <section class="card"> <!-- Card for overall strictness of filtering. -->
 
-      <h2>Sensitivity</h2>
-      <!-- Heading for sensitivity / strictness control. -->
+      <h2>Sensitivity</h2> <!-- Heading for sensitivity / strictness control. -->
 
       <form class="profile-form" id="sensitivityForm">
-        <div class="item-row">
-          <!-- Row for slider + label + Save button. -->
+        <div class="item-row"> <!-- Row for slider + label + Save button. -->
 
           <div>
-            <strong>Filter Sensitivity</strong>
-            <!-- Title describing what the slider controls. -->
+            <strong>Filter Sensitivity</strong> <!-- Title describing what the slider controls. -->
 
-            <p>Adjust how strict ISweep should be overall.</p>
-            <!-- Explanation. -->
+            <p>Adjust how strict ISweep should be overall.</p> <!-- Explanation. -->
 
-            <label>
-              <!-- Label wraps Low text, slider, and High text so they’re grouped. -->
+            <label> <!-- Label wraps Low text, slider, and High text so they’re grouped. -->
 
-              Low
-              <!-- Text shown left of slider. -->
+              Low <!-- Text shown left of slider. -->
 
-              <input type="range" name="sensitivity" min="1" max="3" value="2" />
-              <!-- Range slider input.
+              <input type="range" name="sensitivity" min="1" max="3" value="2" /> <!-- Range slider input.
                    name="sensitivity": form field name.
                    min="1", max="3": possible values are 1, 2, or 3 (3 levels).
                    value="2": default is middle level.
                    In an implementation, JS would read this and tune thresholds. -->
 
-              High
-              <!-- Text shown right of slider. -->
+              High <!-- Text shown right of slider. -->
             </label>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- Saves chosen sensitivity level. JS/backend would persist this. -->
+          <button type="submit">Save</button> <!-- Saves chosen sensitivity level. JS/backend would persist this. -->
         </div>
       </form>
     </section>
 
     <!-- NOTIFICATIONS -->
-    <section class="card">
-      <!-- Card for notification preferences. -->
+    <section class="card"> <!-- Card for notification preferences. -->
 
-      <h2>Notifications</h2>
-      <!-- Heading for notifications section. -->
+      <h2>Notifications</h2> <!-- Heading for notifications section. -->
 
       <form class="profile-form" id="notificationsForm">
         <div class="item-row">
           <div>
-            <strong>Session Reports</strong>
-            <!-- Title for this group of notification settings. -->
+            <strong>Session Reports</strong> <!-- Title for this group of notification settings. -->
 
-            <p>How would you like to receive viewing summaries?</p>
-            <!-- Explanation text. -->
+            <p>How would you like to receive viewing summaries?</p> <!-- Explanation text. -->
 
             <label>
               <input type="checkbox" name="notify-email" checked />
@@ -377,34 +325,26 @@
             </label>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- Saves notification choices.
-               Real behavior: JS might enforce that "notify-none" unchecks others, etc. -->
+          <button type="submit">Save</button> <!-- Saves notification choices. Real behavior: JS might enforce that "notify-none" unchecks others, etc. -->
         </div>
       </form>
     </section>
 
     <!-- PARENTAL CONTROLS -->
-    <section class="card">
-      <!-- Card offering parental PIN and lock settings. -->
+    <section class="card"> <!-- Card offering parental PIN and lock settings. -->
 
-      <h2>Parental Controls</h2>
-      <!-- Heading for parental control section. -->
+      <h2>Parental Controls</h2> <!-- Heading for parental control section. -->
 
       <form class="profile-form" id="parentalForm">
         <div class="item-row">
           <div>
-            <strong>Parental PIN</strong>
-            <!-- Title describing PIN settings. -->
+            <strong>Parental PIN</strong> <!-- Title describing PIN settings. -->
 
-            <p>Lock settings so kids can’t change filters without a PIN.</p>
-            <!-- Explanation of what the PIN protects. -->
+            <p>Lock settings so kids can’t change filters without a PIN.</p> <!-- Explanation of what the PIN protects. -->
 
-            <label>
-              <!-- Label wrapping PIN input. -->
+            <label> <!-- Label wrapping PIN input. -->
 
-              Create / Update PIN<br />
-              <!-- Text above the PIN input, plus a line break. -->
+              Create / Update PIN<br /> <!-- Text above the PIN input, plus a line break. -->
 
               <input
                 class="profile-input"
@@ -423,8 +363,7 @@
                    required: cannot submit without a PIN value. -->
             </label>
 
-            <br /><br />
-            <!-- Two line breaks for visual spacing. -->
+            <br /><br /> <!-- Two line breaks for visual spacing. -->
 
             <label>
               <input type="checkbox" name="require-pin" checked />
@@ -435,13 +374,26 @@
             </label>
           </div>
 
-          <button type="submit">Save</button>
-          <!-- In full implementation: saves PIN and lock preference.
-               Backend must handle secure storage and verification; JS can
-               handle gating the UI as well. -->
+          <button type="submit">Save</button> <!-- In full implementation: saves PIN and lock preference. Backend must handle secure storage and verification; JS can handle gating the UI as well. -->
         </div>
       </form>
     </section>
+
+    </section>
+
+    <aside class="card" style="padding: 1.1rem; position: sticky; top: 1rem; display: grid; gap: 0.75rem;"> <!-- This contextual panel shows focused category info to mirror a control center sidebar. -->
+      <h3 style="margin: 0;">Context</h3> <!-- This heading labels the sidebar. -->
+      <p style="margin: 0; color: #475569;">Select a category to preview its current action and sensitivity.</p> <!-- This note guides users on how the panel is used. -->
+      <div style="padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #f8fafc;"> <!-- This box presents current selection details. -->
+        <strong>Selected: Profanity</strong> <!-- This placeholder shows the focused category. -->
+        <p style="margin: 0.35rem 0 0 0; color: #475569;">Action: Mute audio only</p> <!-- This line summarizes the configured action. -->
+        <p style="margin: 0.15rem 0 0 0; color: #475569;">Duration: 4s</p> <!-- This line shows the action duration. -->
+      </div>
+      <div style="padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #f8fafc;"> <!-- This secondary box can hold tips or helper text. -->
+        <strong>Tip</strong> <!-- This heading labels the tip. -->
+        <p style="margin: 0.35rem 0 0 0; color: #475569;">Use “Log only” for categories you’re still tuning.</p> <!-- This advice encourages cautious experimentation. -->
+      </div>
+    </aside>
 
   </main>
 

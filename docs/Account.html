@@ -51,19 +51,36 @@
     </div>
   </header>
 
-  <main class="account-page container">
-    <h1>My Account</h1>
-    <p class="subtitle">Manage your personal info, subscription, devices, and security.</p>
+  <main class="account-page container" style="display: grid; grid-template-columns: 240px 1fr; gap: 1.5rem; align-items: start;"> <!-- This grid creates a sidebar + content layout to give the page a SaaS dashboard feel without changing the color system. -->
+    <aside class="card" style="padding: 1.25rem; position: sticky; top: 1rem; align-self: start;"> <!-- This sidebar card holds the dashboard navigation and stays visible as users scroll. -->
+      <h2 style="margin-top: 0; margin-bottom: 0.75rem;">Account</h2> <!-- This heading labels the sidebar navigation clearly. -->
+      <nav class="stacked-nav" style="display: grid; gap: 0.5rem;"> <!-- This nav lists account sections to mimic a control panel. -->
+        <a href="#overview" style="padding: 0.65rem 0.75rem; border-radius: 10px; background: #f8fafc; text-decoration: none; color: inherit; font-weight: 600;">Overview</a> <!-- This link jumps to the overview card to orient the user. -->
+        <a href="#subscription" style="padding: 0.65rem 0.75rem; border-radius: 10px; background: #f8fafc; text-decoration: none; color: inherit; font-weight: 600;">Subscription</a> <!-- This link jumps to the subscription card for quick plan access. -->
+        <a href="#devices" style="padding: 0.65rem 0.75rem; border-radius: 10px; background: #f8fafc; text-decoration: none; color: inherit; font-weight: 600;">Devices</a> <!-- This link jumps to the devices card to manage hardware. -->
+        <a href="#filters" style="padding: 0.65rem 0.75rem; border-radius: 10px; background: #f8fafc; text-decoration: none; color: inherit; font-weight: 600;">Filters</a> <!-- This link jumps to filter preferences to mirror a control center feel. -->
+        <a href="#billing" style="padding: 0.65rem 0.75rem; border-radius: 10px; background: #f8fafc; text-decoration: none; color: inherit; font-weight: 600;">Billing</a> <!-- This link jumps to billing for quick payment updates. -->
+        <a href="#security" style="padding: 0.65rem 0.75rem; border-radius: 10px; background: #f8fafc; text-decoration: none; color: inherit; font-weight: 600;">Security</a> <!-- This link jumps to security controls like password and 2FA. -->
+      </nav>
+    </aside>
 
-    <!-- Profile Section -->
-    <section class="card">
-      <h2>Profile</h2>
-
-      <form class="profile-form">
-        <!-- NAME -->
-        <div class="item-row">
+    <section style="display: grid; gap: 1rem;"> <!-- This column stacks the main cards to keep the layout clean and scannable. -->
+      <header id="overview" class="card" style="padding: 1.25rem; display: grid; gap: 0.5rem;"> <!-- This top card summarizes the account state for quick at-a-glance info. -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;"> <!-- This row aligns the title and plan badge. -->
           <div>
-            <label>
+            <h1 style="margin: 0;">My Account</h1> <!-- This heading labels the page context. -->
+            <p class="subtitle" style="margin: 0;">Manage your personal info, subscription, devices, and security.</p> <!-- This subtitle reinforces the dashboard scope. -->
+          </div>
+          <span style="padding: 0.35rem 0.65rem; border-radius: 999px; background: #e0f2fe; color: #075985; font-weight: 700;">Active Plan</span> <!-- This badge highlights the plan state to make status obvious. -->
+        </div>
+        <p style="margin: 0; color: #475569;">Keep your contact details, payment methods, and devices in sync so ISweep can protect all your screens.</p> <!-- This supporting line sets a professional tone without changing colors. -->
+      </header>
+
+      <section id="profile" class="card" style="padding: 1.25rem;"> <!-- This card groups profile fields in a tidy stack. -->
+        <h2 style="margin-top: 0;">Profile</h2> <!-- This heading labels the profile details. -->
+        <form class="profile-form" style="display: grid; gap: 0.75rem;"> <!-- This grid spaces the form rows for readability. -->
+          <div class="item-row" style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center;"> <!-- This row aligns the name field and action button. -->
+            <label style="display: block;"> <!-- This label wraps the name input for accessibility. -->
               <strong>Name</strong>
               <input
                 class="profile-input"
@@ -73,14 +90,11 @@
                 required
               />
             </label>
+            <button type="submit">Edit</button> <!-- This button keeps inline editing affordance. -->
           </div>
-          <button type="submit">Edit</button>
-        </div>
 
-        <!-- EMAIL -->
-        <div class="item-row">
-          <div>
-            <label>
+          <div class="item-row" style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center;"> <!-- This row aligns the email field and action button. -->
+            <label style="display: block;">
               <strong>Email</strong>
               <input
                 class="profile-input"
@@ -90,14 +104,11 @@
                 required
               />
             </label>
+            <button type="submit">Edit</button> <!-- This button retains the edit flow for email. -->
           </div>
-          <button type="submit">Edit</button>
-        </div>
 
-        <!-- MOBILE NUMBER -->
-        <div class="item-row">
-          <div>
-            <label>
+          <div class="item-row" style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center;"> <!-- This row aligns the phone field and action button. -->
+            <label style="display: block;">
               <strong>Mobile Number</strong>
               <input
                 class="profile-input"
@@ -108,64 +119,22 @@
                 pattern="[0-9]{10}"
               />
             </label>
+            <button type="submit">Edit</button> <!-- This button supports inline phone updates. -->
           </div>
-          <button type="submit">Edit</button>
-        </div>
-      </form>
-    </section>
+        </form>
+      </section>
 
-    <!-- Address Section -->
-    <section class="card">
-      <h2>Address</h2>
-      <form class="profile-form">
-        <div class="item-row">
+      <section id="subscription" class="card" style="padding: 1.25rem;"> <!-- This card summarizes the plan and actions. -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;"> <!-- This row aligns plan label with actions. -->
           <div>
-            <label>
-              <strong>Home Address</strong>
-              <input
-                class="profile-input"
-                type="text"
-                name="address"
-                placeholder="Add"
-                required
-              />
-            </label>
+            <h2 style="margin: 0;">Your Plan</h2> <!-- This heading labels the plan section. -->
+            <p style="margin: 0; color: #475569;">Manage your subscription and ownership status.</p> <!-- This subtitle clarifies the card purpose. -->
           </div>
-          <button type="submit">Edit</button>
+          <span style="padding: 0.35rem 0.65rem; border-radius: 999px; background: #e0f2fe; color: #075985; font-weight: 700;">Current</span> <!-- This badge reinforces that the plan shown is active. -->
         </div>
-      </form>
-    </section>
-
-    <!-- Payment Section -->
-    <section class="card">
-      <h2>Payment</h2>
-      <form class="profile-form">
-        <div class="item-row">
-          <div>
-            <label>
-              <strong>Payment Method</strong>
-              <input
-                class="profile-input"
-                type="text"
-                name="payment"
-                placeholder="Add"
-                required
-              />
-            </label>
-          </div>
-          <button type="submit">Update</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- Subscription Section -->
-    <section class="card">
-      <h2>Your Plan</h2>
-
-      <form class="profile-form">
-        <div class="item-row">
-          <div>
-            <label>
+        <form class="profile-form" style="margin-top: 0.75rem; display: grid; gap: 0.75rem;">
+          <div class="item-row" style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center;"> <!-- This row keeps the plan field and action aligned. -->
+            <label style="display: block;">
               <strong>Current Plan</strong>
               <input 
                 class="profile-input"
@@ -175,39 +144,57 @@
                 readonly
               />
             </label>
+            <button type="submit">Manage Plan</button> <!-- This button links to plan management flow. -->
           </div>
-          <button type="submit">Manage Plan</button>
+        </form>
+        <p style="margin: 0.25rem 0 0 0;">Your current plan: <strong id="current-plan-display"></strong></p> <!-- This line reflects the synced plan label from storage. -->
+      </section>
+
+      <section id="devices" class="card" style="padding: 1.25rem;"> <!-- This card holds device management actions. -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;"> <!-- This row balances the heading and CTA. -->
+          <h2 style="margin: 0;">Devices</h2> <!-- This heading labels the device list. -->
+          <button class="secondary-btn">Add Device</button> <!-- This button stays as the primary device CTA. -->
         </div>
-      </form>
-
-      <p>Your current plan: <strong id="current-plan-display"></strong></p>
-    </section>
-
-    <!-- Device Management -->
-    <section class="card">
-      <h2>Devices</h2>
-      <div class="item-row">
-        <div>
-          <strong>Samsung Smart TV</strong>
-          <p>Living Room</p>
+        <div class="item-row" style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; margin-top: 0.75rem;"> <!-- This row formats the sample device entry. -->
+          <div>
+            <strong>Samsung Smart TV</strong>
+            <p style="margin: 0;">Living Room</p>
+          </div>
+          <button>Remove</button> <!-- This button keeps device removal affordance. -->
         </div>
-        <button>Remove</button>
-      </div>
-      <button class="secondary-btn">Add Device</button>
-    </section>
+      </section>
 
-    <!-- Security -->
-    <section class="card">
-      <h2>Security</h2>
-      <button>Change Password</button>
-      <button>Enable 2-Step Verification</button>
-    </section>
+      <section id="filters" class="card" style="padding: 1.25rem;"> <!-- This card references filter settings from the dashboard context. -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;"> <!-- This row aligns heading and action. -->
+          <div>
+            <h2 style="margin: 0;">Filters</h2> <!-- This heading points to filtering controls. -->
+            <p style="margin: 0; color: #475569;">Adjust content rules and sensitivity in Settings.</p> <!-- This note guides users to the detailed control center. -->
+          </div>
+          <a href="Settings.html" class="btn btn-primary" style="padding: 0.55rem 0.9rem;">Open Settings</a> <!-- This button jumps to the dedicated filtering page to keep flows intact. -->
+        </div>
+      </section>
 
-    <!-- Support -->
-    <section class="card">
-      <h2>Support</h2>
-      <button>Contact Support</button>
-      <button>Visit Help Center</button>
+      <section id="billing" class="card" style="padding: 1.25rem;"> <!-- This card groups billing actions. -->
+        <h2 style="margin-top: 0;">Billing</h2> <!-- This heading labels the billing card. -->
+        <p style="margin: 0 0 0.5rem 0; color: #475569;">Update payment methods and download invoices.</p> <!-- This note clarifies what belongs here. -->
+        <button class="secondary-btn">Update Payment Method</button> <!-- This button mirrors the existing payment update CTA. -->
+      </section>
+
+      <section id="security" class="card" style="padding: 1.25rem;"> <!-- This card collects security-related actions. -->
+        <h2 style="margin-top: 0;">Security</h2> <!-- This heading labels the security area. -->
+        <div style="display: grid; gap: 0.5rem;"> <!-- This grid stacks the security actions neatly. -->
+          <button>Change Password</button> <!-- This button keeps password change available. -->
+          <button>Enable 2-Step Verification</button> <!-- This button keeps 2FA accessible. -->
+        </div>
+      </section>
+
+      <section id="support" class="card" style="padding: 1.25rem;"> <!-- This card retains support shortcuts. -->
+        <h2 style="margin-top: 0;">Support</h2> <!-- This heading labels support options. -->
+        <div style="display: grid; gap: 0.5rem;"> <!-- This grid spaces the support actions for clarity. -->
+          <button>Contact Support</button> <!-- This button keeps contact support visible. -->
+          <button>Visit Help Center</button> <!-- This button keeps help resources accessible. -->
+        </div>
+      </section>
     </section>
   </main>
 
