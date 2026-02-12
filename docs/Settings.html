@@ -72,10 +72,26 @@
              For a real app, you’d want "active" on Settings instead for this file. -->
       </nav>
 
-      <!-- Single Dark Mode button -->
-      <button id="themeBtn" class="theme-toggle">
-        Dark Mode
-      </button>
+      <!-- Profile dropdown replaces the standalone theme toggle to deliver account + display controls together. -->
+      <div class="profile-menu" style="position: relative;"> <!-- This wrapper anchors the dropdown panel to the avatar spot. -->
+        <details class="user-menu" style="position: relative;"> <!-- This details element provides built-in open/close behavior with no extra JS. -->
+          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;"> <!-- This summary shows the avatar chip and current display mode to mimic SaaS headers. -->
+            <span class="avatar-chip" style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span> <!-- This avatar chip adds a professional profile affordance without touching the token palette. -->
+            <span id="themeModeLabel" style="font-weight: 600;">Light</span> <!-- This label reflects the active display mode so the user can see the current state. -->
+          </summary>
+          <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 210px; z-index: 30;"> <!-- This panel holds quick links and display controls in a compact menu. -->
+            <a href="Account.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Account</a> <!-- This link routes to the account dashboard from the header. -->
+            <a href="Settings.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Preferences</a> <!-- This keeps a direct path to the current page within the menu for consistency. -->
+            <div style="padding: 8px 10px; border-radius: 8px; background: #f8fafc; margin: 6px 0;"> <!-- This grouped block makes the display choices easy to scan. -->
+              <p style="margin: 0 0 6px 0; font-weight: 700;">Display</p> <!-- This label clarifies the theme controls below. -->
+              <button type="button" data-theme-option="light" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Light</button> <!-- This button sets light mode through the shared theme handler. -->
+              <button type="button" data-theme-option="dark" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Dark</button> <!-- This button switches to dark mode without altering tokens. -->
+              <button type="button" data-theme-option="system" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff;">System</button> <!-- This button aligns the site theme with the OS preference. -->
+            </div>
+            <a href="#" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Log Out</a> <!-- This placeholder logout keeps the dropdown aligned with SaaS menus. -->
+          </div>
+        </details>
+      </div>
     </div>
   </header>
 
