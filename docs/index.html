@@ -43,6 +43,10 @@
             <button type="button" data-open-auth="create" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Create Account</button> <!-- This button opens the modal in create-account mode for new users. -->
           </div>
           <div data-auth-signed-in style="display: none; margin-top: 6px; gap: 8px;"> <!-- This block shows when signed in to expose account actions. -->
+            <div style="padding: 6px 10px; border-radius: 8px; background: #f8fafc; display: grid; gap: 2px;"> <!-- This sub-block surfaces who is signed in. -->
+              <strong class="account-name">Welcome back</strong> <!-- This name is filled from auth state. -->
+              <span class="account-email" style="font-size: 0.9rem; color: #475569;">Signed in</span> <!-- This email is filled from auth state. -->
+            </div>
             <button type="button" data-open-auth="account" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Account</button> <!-- This button opens the modal to view account details instead of a separate page. -->
             <a href="Settings.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Preferences</a> <!-- This link routes to Settings to manage preferences. -->
             <div style="padding: 8px 10px; border-radius: 8px; background: #f8fafc; margin: 6px 0;"> <!-- This block groups display options similar to SaaS dropdowns. -->

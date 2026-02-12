@@ -95,9 +95,6 @@
         <a href="index.html">Home</a>
         <!-- Go to landing/home page. -->
 
-        <a href="Account.html">Account</a>
-        <!-- Go to account management page. -->
-
         <a href="Plans.html" class ="active">Plans</a>
         <!-- Link to the current page (Plans).
              class="active" visually highlights this nav item. -->
@@ -109,23 +106,33 @@
         <!-- Go to help/support page. -->
       </nav>
 
-      <!-- Profile dropdown replaces the old theme toggle to bundle account and display controls in the header. -->
-      <div class="profile-menu" style="position: relative;"> <!-- This wrapper anchors the dropdown panel to the avatar position. -->
-        <details class="user-menu" style="position: relative;"> <!-- This details element gives us a native toggle without extra JS for open/close. -->
-          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;"> <!-- This summary shows the avatar chip plus current mode label for a SaaS-style control. -->
-            <span class="avatar-chip" style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span> <!-- This avatar chip provides a professional profile affordance while keeping the existing color palette. -->
-            <span id="themeModeLabel" style="font-weight: 600;">Light</span> <!-- This label reflects the active display mode so users know what is applied. -->
+      <!-- Profile dropdown now holds auth actions and display options since the Account nav link is removed. -->
+      <div class="profile-menu" style="position: relative;"> <!-- This wrapper anchors the dropdown panel to the avatar spot without altering the header grid. -->
+        <details class="user-menu" style="position: relative;"> <!-- This details element provides native open/close behavior so no extra JS is needed for toggling. -->
+          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;"> <!-- This summary shows the avatar chip and current display mode for a SaaS-like affordance. -->
+            <span class="avatar-chip" data-avatar-chip style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span> <!-- This avatar chip provides a professional profile handle while keeping the existing palette. -->
+            <span id="themeModeLabel" style="font-weight: 600;">Light</span> <!-- This label mirrors the active display mode so users see the current state. -->
           </summary>
-          <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 210px; z-index: 30;"> <!-- This panel holds quick account links and theme options without altering layout. -->
-            <a href="Account.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Account</a> <!-- This link routes to the account dashboard from the header. -->
-            <a href="Settings.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Preferences</a> <!-- This link leads to settings to match SaaS menus. -->
-            <div style="padding: 8px 10px; border-radius: 8px; background: #f8fafc; margin: 6px 0;"> <!-- This grouped block makes the display controls easy to scan. -->
-              <p style="margin: 0 0 6px 0; font-weight: 700;">Display</p> <!-- This label clarifies the theme controls below. -->
-              <button type="button" data-theme-option="light" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Light</button> <!-- This option applies light mode through the shared theme handler. -->
-              <button type="button" data-theme-option="dark" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Dark</button> <!-- This option switches to dark mode while retaining existing colors. -->
-              <button type="button" data-theme-option="system" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff;">System</button> <!-- This option follows the OS preference to stay in sync with the device. -->
+          <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 230px; z-index: 30;"> <!-- This panel holds auth links and theme options in one place. -->
+            <div data-auth-signed-out style="display: grid; gap: 6px;"> <!-- This block shows when signed out so users can authenticate. -->
+              <button type="button" data-open-auth="signin" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Sign In</button> <!-- This button opens the modal in sign-in mode for existing users. -->
+              <button type="button" data-open-auth="create" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Create Account</button> <!-- This button opens the modal in create-account mode for new users. -->
             </div>
-            <a href="#" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Log Out</a> <!-- This placeholder logout keeps the menu aligned with SaaS patterns. -->
+            <div data-auth-signed-in style="display: none; margin-top: 6px; gap: 8px;"> <!-- This block shows when signed in to expose account actions. -->
+              <div style="padding: 6px 10px; border-radius: 8px; background: #f8fafc; display: grid; gap: 2px;"> <!-- This sub-block surfaces who is signed in. -->
+                <strong class="account-name">Welcome back</strong> <!-- This name is filled from auth state. -->
+                <span class="account-email" style="font-size: 0.9rem; color: #475569;">Signed in</span> <!-- This email is filled from auth state. -->
+              </div>
+              <button type="button" data-open-auth="account" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Account</button> <!-- This button opens the modal to view account details instead of a separate page. -->
+              <a href="Settings.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Preferences</a> <!-- This link routes to Settings to manage preferences. -->
+              <div style="padding: 8px 10px; border-radius: 8px; background: #f8fafc; margin: 6px 0;"> <!-- This block groups display options similar to SaaS dropdowns. -->
+                <p style="margin: 0 0 6px 0; font-weight: 700;">Display</p> <!-- This label clarifies the theme controls. -->
+                <button type="button" data-theme-option="light" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Light</button> <!-- This option applies light mode via the shared handler. -->
+                <button type="button" data-theme-option="dark" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Dark</button> <!-- This option switches to dark mode while keeping tokens unchanged. -->
+                <button type="button" data-theme-option="system" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff;">System</button> <!-- This option follows the OS preference for theme. -->
+              </div>
+              <button type="button" data-logout style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Log Out</button> <!-- This button clears auth state and refreshes the UI when selected. -->
+            </div>
           </div>
         </details>
       </div>
@@ -440,6 +447,61 @@
       </div>
     </section>
   </main>
+
+  <!-- Auth modal hosts sign-in/create-account flows so the Account link can live inside the dropdown. -->
+  <div id="authModal" class="auth-modal" style="display:none;"> <!-- This outer wrapper provides the modal overlay container. -->
+    <div class="auth-backdrop" data-close-auth style="position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 2000;"> <!-- This backdrop darkens the page and listens for outside clicks to close. -->
+      <div class="auth-dialog" role="dialog" aria-modal="true" style="background: #ffffff; border-radius: 12px; padding: 18px; width: min(480px, 90vw); box-shadow: 0 18px 40px rgba(0,0,0,0.22); position: relative;"> <!-- This dialog holds all auth panels in a compact card. -->
+        <button type="button" class="auth-close" data-close-auth style="position: absolute; top: 10px; right: 10px; border: none; background: transparent; font-size: 1.1rem; cursor: pointer;">×</button> <!-- This close button lets users exit the modal quickly. -->
+
+        <div data-auth-panel="signin" style="display: none;"> <!-- This panel shows the sign-in form. -->
+          <h2 style="margin-top: 0;">Sign In</h2> <!-- This heading labels the sign-in mode. -->
+          <form id="signInForm" style="display: grid; gap: 0.75rem;">
+            <label style="display: grid; gap: 0.25rem;">
+              <span>Email</span>
+              <input type="email" name="email" required style="padding: 0.65rem; border: 1px solid #e5e7eb; border-radius: 10px;" />
+            </label>
+            <label style="display: grid; gap: 0.25rem;">
+              <span>Password</span>
+              <input type="password" name="password" required style="padding: 0.65rem; border: 1px solid #e5e7eb; border-radius: 10px;" />
+            </label>
+            <button type="submit" style="padding: 0.75rem; border-radius: 10px; border: none; background: #2563eb; color: #fff; font-weight: 700;">Continue</button>
+            <button type="button" data-switch-auth="create" style="padding: 0.65rem; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff;">Need an account? Create one</button>
+          </form>
+        </div>
+
+        <div data-auth-panel="create" style="display: none;"> <!-- This panel shows the create-account form. -->
+          <h2 style="margin-top: 0;">Create Account</h2> <!-- This heading labels the registration mode. -->
+          <form id="createAccountForm" style="display: grid; gap: 0.75rem;">
+            <label style="display: grid; gap: 0.25rem;">
+              <span>Full Name</span>
+              <input type="text" name="name" required style="padding: 0.65rem; border: 1px solid #e5e7eb; border-radius: 10px;" />
+            </label>
+            <label style="display: grid; gap: 0.25rem;">
+              <span>Email</span>
+              <input type="email" name="email" required style="padding: 0.65rem; border: 1px solid #e5e7eb; border-radius: 10px;" />
+            </label>
+            <label style="display: grid; gap: 0.25rem;">
+              <span>Password</span>
+              <input type="password" name="password" required style="padding: 0.65rem; border: 1px solid #e5e7eb; border-radius: 10px;" />
+            </label>
+            <label style="display: grid; gap: 0.25rem;">
+              <span>Confirm Password</span>
+              <input type="password" name="confirm" required style="padding: 0.65rem; border: 1px solid #e5e7eb; border-radius: 10px;" />
+            </label>
+            <button type="submit" style="padding: 0.75rem; border-radius: 10px; border: none; background: #2563eb; color: #fff; font-weight: 700;">Create Account</button>
+            <button type="button" data-switch-auth="signin" style="padding: 0.65rem; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff;">Already have an account? Sign in</button>
+          </form>
+        </div>
+
+        <div data-auth-panel="account" style="display: none;"> <!-- This panel shows a simple account summary when signed in. -->
+          <h2 style="margin-top: 0;">Account</h2> <!-- This heading labels the account view. -->
+          <p id="accountSummary" style="margin: 0 0 0.75rem 0;">Signed in user details appear here.</p> <!-- This paragraph will be populated with the user’s name/email from localStorage. -->
+          <button type="button" data-logout style="padding: 0.75rem; border-radius: 10px; border: none; background: #ef4444; color: #fff; font-weight: 700;">Log Out</button> <!-- This button signs the user out from within the modal. -->
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
