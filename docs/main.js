@@ -1,3 +1,191 @@
+const CURRENT_PLAN_KEY = "currentPlan"; // Single localStorage key for plan data
+const SETTINGS_KEY = "isweep-settings";
+const themePreferenceKey = 'theme-preference';
+const authStateKey = 'auth-state'; // Stores { name, email, token } for demo purposes.
+const authModal = document.getElementById('authModal');
+const authBackdrop = authModal ? authModal.querySelector('.auth-backdrop') : null;
+const authPanels = authModal ? authModal.querySelectorAll('[data-auth-panel]') : [];
+const accountSummary = authModal ? authModal.querySelector('#accountSummary') : null;
+const signInForm = authModal ? authModal.querySelector('#signInForm') : null;
+const createAccountForm = authModal ? authModal.querySelector('#createAccountForm') : null;
+const dropdown = document.querySelector('.dropdown');
+const dropdownMenu = document.querySelector('.dropdown-menu');
+const dropdownToggle = document.querySelector('.dropdown-toggle');
+const signedInBlock = dropdownMenu ? dropdownMenu.querySelector('[data-auth-signed-in]') : null;
+const signedOutBlock = dropdownMenu ? dropdownMenu.querySelector('[data-auth-signed-out]') : null;
+const authLaunchers = document.querySelectorAll('[data-open-auth]');
+const authSwitchers = document.querySelectorAll('[data-switch-auth]');
+const logoutButtons = document.querySelectorAll('[data-logout]');
+const authState = {
+  get() {
+    try {
+      const raw = localStorage.getItem(authStateKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      console.error('Failed to parse auth state', error);
+      return null;
+    }
+  },
+  set(state) {
+    localStorage.setItem(authStateKey, JSON.stringify(state));
+  },
+  clear() {
+    localStorage.removeItem(authStateKey);
+  },
+};
+
+function applyThemePreference() {
+  const savedTheme = localStorage.getItem(themePreferenceKey) || 'light';
+  applyTheme(savedTheme);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  // Sync button state for clarity.
+  themeButtons.forEach((button) => {
+    const isSelected = button.getAttribute('data-theme-option') === theme;
+    button.setAttribute('aria-pressed', isSelected);
+  });
+}
+
+function showAuthPanel(panel) {
+  if (!authModal) return;
+  authPanels.forEach((p) => {
+    p.style.display = p.getAttribute('data-auth-panel') === panel ? 'block' : 'none';
+  });
+  authModal.style.display = 'block';
+}
+
+function closeAuth() {
+  if (!authModal) return;
+  authModal.style.display = 'none';
+}
+
+function syncAuthUI() {
+  const state = authState.get();
+  const isSignedIn = Boolean(state);
+
+  if (signedInBlock && signedOutBlock) {
+    signedInBlock.style.display = isSignedIn ? 'block' : 'none';
+    signedOutBlock.style.display = isSignedIn ? 'none' : 'block';
+    if (state) {
+      const accountName = signedInBlock.querySelector('.account-name');
+      const accountEmail = signedInBlock.querySelector('.account-email');
+      if (accountName) accountName.textContent = state.name || 'Welcome back';
+      if (accountEmail) accountEmail.textContent = state.email || '';
+    }
+  }
+
+  if (accountSummary) {
+    accountSummary.textContent = state
+      ? `${state.name || 'Account'}, ${state.email || ''}`
+      : 'Not signed in.';
+  }
+}
+
+function fakeAuthApi(payload) {
+  // Placeholder to simulate async auth; replace with real API later.
+  return new Promise((resolve) => {
+    setTimeout(() => resolve({ token: 'demo-token', ...payload }), 300);
+  });
+}
+
+if (themeButtons.length) {
+  themeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const theme = button.getAttribute('data-theme-option');
+      localStorage.setItem(themePreferenceKey, theme);
+      applyTheme(theme);
+    });
+  });
+
+  applyThemePreference();
+}
+
+if (dropdown && dropdownMenu && dropdownToggle) {
+  dropdownToggle.addEventListener('click', () => {
+    dropdownMenu.classList.toggle('show');
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!dropdown.contains(event.target)) {
+      dropdownMenu.classList.remove('show');
+    }
+  });
+}
+
+if (authLaunchers.length && authModal) {
+  authLaunchers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      showAuthPanel('signin');
+    });
+  });
+}
+
+if (authSwitchers.length) {
+  authSwitchers.forEach((switcher) => {
+    switcher.addEventListener('click', () => {
+      const target = switcher.getAttribute('data-switch-auth');
+      if (target) showAuthPanel(target);
+    });
+  });
+}
+
+if (logoutButtons.length) {
+  logoutButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      authState.clear();
+      syncAuthUI();
+      closeAuth();
+      if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+  });
+}
+
+if (authBackdrop) {
+  authBackdrop.addEventListener('click', (event) => {
+    if (event.target === authBackdrop || event.target.hasAttribute('data-close-auth')) {
+      closeAuth();
+    }
+  });
+}
+
+if (signInForm) {
+  signInForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(signInForm);
+    const payload = {
+      email: formData.get('email'),
+      password: formData.get('password'),
+    };
+    const result = await fakeAuthApi(payload);
+    authState.set({ name: payload.email.split('@')[0] || 'User', email: payload.email, token: result.token });
+    syncAuthUI();
+    closeAuth();
+    if (dropdownMenu) dropdownMenu.classList.remove('show');
+  });
+}
+
+if (createAccountForm) {
+  createAccountForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(createAccountForm);
+    const payload = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      confirm: formData.get('confirm'),
+    };
+    // TODO: add password confirmation validation + real API integration when backend is ready.
+    const result = await fakeAuthApi(payload);
+    authState.set({ name: payload.name || 'New user', email: payload.email, token: result.token });
+    syncAuthUI();
+    closeAuth();
+    if (dropdownMenu) dropdownMenu.classList.remove('show');
+  });
+}
+
+syncAuthUI();
 //-----------------------------------------------------
 //  ISWEEP PLAN SYSTEM
 //-----------------------------------------------------
