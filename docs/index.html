@@ -52,8 +52,11 @@
         </div>
       </div>
 
-      <div class="hero-visual">
-        <img src="images/hero-placeholder.png" alt="ISweep app preview" />
+      <div class="hero-visual"> <!-- This container keeps the single demo video anchored in the hero area so users see the preview instantly. -->
+        <video id="demoVideo" class="hero-video" controls muted playsinline style="width:100%; max-width:640px; border-radius:12px; box-shadow:0 18px 45px rgba(0,0,0,0.18);"> <!-- This video element replaces the old placeholder image so we show the live demo only here. -->
+          <source src="your-video-file.mp4" type="video/mp4" /> <!-- This source points to the demo MP4 so the hero preview can play in all modern browsers. -->
+          Your browser does not support the video tag. <!-- This fallback text explains the video requirement so users understand why playback may not work. -->
+        </video>
       </div>
     </div>
   </section>
@@ -103,12 +106,6 @@
 
   <p id="decisionOutput" style="margin-top: 1rem; font-family: monospace;"></p>
 </section>
-
-<!-- Optional: demo video to mute/skip -->
-<video id="demoVideo" width="600" controls style="display:block; margin: 2rem auto;">
-  <source src="your-video-file.mp4" type="video/mp4" />
-  Your browser does not support the video tag.
-</video>
 
 <!-- Tiny broom icon overlay (hidden by default) -->
 <div id="broomIcon"
