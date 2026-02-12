@@ -65,29 +65,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 //-----------------------------------------------------
-//  THEME TOGGLE (All pages)
+//  THEME PICKER (All pages via avatar dropdown)
 //-----------------------------------------------------
-const themeBtn = document.getElementById("themeBtn");
+const themeModeLabel = document.getElementById("themeModeLabel"); // This grabs the visible theme label in the header dropdown so we can show the active mode.
 
-if (themeBtn) {
-  // Load saved theme and apply it
-  const savedTheme = localStorage.getItem("isweep-theme") || "light";
-  if (savedTheme === "dark") {
-    document.documentElement.classList.add("dark");
-    themeBtn.textContent = "Light Mode";
-  } else {
-    document.documentElement.classList.remove("dark");
-    themeBtn.textContent = "Dark Mode";
-  }
+function applyThemePreference(preference) { // This function applies the chosen theme and records the preference for later visits.
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches; // This reads the system theme so "system" mode can mirror the OS choice.
+  const resolvedTheme = preference === "system" ? (prefersDark ? "dark" : "light") : preference; // This decides whether to use light or dark based on user choice or system setting.
+  document.documentElement.classList.toggle("dark", resolvedTheme === "dark"); // This toggles the root .dark class so all pages switch palettes consistently.
+  localStorage.setItem("isweep-theme", preference); // This stores the user’s preference so it persists across page loads.
+  if (themeModeLabel) themeModeLabel.textContent = preference === "system" ? "System" : resolvedTheme === "dark" ? "Dark" : "Light"; // This updates the header label so users see which mode is active.
+} // This closes the theme application helper.
 
-  // Toggle theme on button click
-  themeBtn.addEventListener("click", () => {
-    const isDark = document.documentElement.classList.toggle("dark");
-    const newTheme = isDark ? "dark" : "light";
-    localStorage.setItem("isweep-theme", newTheme);
-    themeBtn.textContent = isDark ? "Light Mode" : "Dark Mode";
-  });
-}
+const savedThemePreference = localStorage.getItem("isweep-theme") || "light"; // This reads the last saved theme so we can initialize the UI predictably.
+applyThemePreference(savedThemePreference); // This applies the stored theme immediately so the page loads in the correct palette.
+
+const themeOptionButtons = document.querySelectorAll("[data-theme-option]"); // This selects all dropdown buttons that set a specific theme choice.
+themeOptionButtons.forEach((button) => { // This loops through each option so we can attach click handlers individually.
+  button.addEventListener("click", () => { // This listens for a user click on a theme option.
+    const targetTheme = button.getAttribute("data-theme-option"); // This reads the desired theme from the data attribute so the handler stays generic.
+    applyThemePreference(targetTheme); // This applies the selected theme and updates storage/label accordingly.
+  }); // This closes the click listener attachment for a single button.
+}); // This finishes wiring all theme option buttons.
 
 //-----------------------------------------------------
 //  ACCOUNT PAGE DISPLAY
