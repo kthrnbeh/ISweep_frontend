@@ -1,6 +1,6 @@
 const CURRENT_PLAN_KEY = "currentPlan"; // Single localStorage key for plan data
 const SETTINGS_KEY = "isweep-settings";
-const themePreferenceKey = 'theme-preference';
+const themePreferenceKey = 'isweep-theme';
 const authStateKey = 'auth-state'; // Stores { name, email, token } for demo purposes.
 const authModal = document.getElementById('authModal');
 const authBackdrop = authModal ? authModal.querySelector('.auth-backdrop') : null;
@@ -8,11 +8,10 @@ const authPanels = authModal ? authModal.querySelectorAll('[data-auth-panel]') :
 const accountSummary = authModal ? authModal.querySelector('#accountSummary') : null;
 const signInForm = authModal ? authModal.querySelector('#signInForm') : null;
 const createAccountForm = authModal ? authModal.querySelector('#createAccountForm') : null;
-const dropdown = document.querySelector('.dropdown');
-const dropdownMenu = document.querySelector('.dropdown-menu');
-const dropdownToggle = document.querySelector('.dropdown-toggle');
-const signedInBlock = dropdownMenu ? dropdownMenu.querySelector('[data-auth-signed-in]') : null;
-const signedOutBlock = dropdownMenu ? dropdownMenu.querySelector('[data-auth-signed-out]') : null;
+const themeButtons = document.querySelectorAll('[data-theme-option]');
+const themeModeLabel = document.getElementById("themeModeLabel");
+const signedInBlock = document.querySelector('[data-auth-signed-in]');
+const signedOutBlock = document.querySelector('[data-auth-signed-out]');
 const authLaunchers = document.querySelectorAll('[data-open-auth]');
 const authSwitchers = document.querySelectorAll('[data-switch-auth]');
 const logoutButtons = document.querySelectorAll('[data-logout]');
@@ -34,16 +33,20 @@ const authState = {
   },
 };
 
-function applyThemePreference() {
-  const savedTheme = localStorage.getItem(themePreferenceKey) || 'light';
-  applyTheme(savedTheme);
-}
+function applyThemePreference(preference) {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const resolvedTheme = preference === 'system' ? (prefersDark ? 'dark' : 'light') : preference;
+  document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
+  localStorage.setItem(themePreferenceKey, preference);
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  // Sync button state for clarity.
+  if (themeModeLabel) {
+    const label = preference === 'system' ? 'System' : resolvedTheme === 'dark' ? 'Dark' : 'Light';
+    themeModeLabel.textContent = label;
+  }
+
   themeButtons.forEach((button) => {
-    const isSelected = button.getAttribute('data-theme-option') === theme;
+    const isSelected = button.getAttribute('data-theme-option') === preference;
     button.setAttribute('aria-pressed', isSelected);
   });
 }
@@ -90,34 +93,23 @@ function fakeAuthApi(payload) {
   });
 }
 
+const savedThemePreference = localStorage.getItem(themePreferenceKey) || 'light';
+applyThemePreference(savedThemePreference);
+
 if (themeButtons.length) {
   themeButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const theme = button.getAttribute('data-theme-option');
-      localStorage.setItem(themePreferenceKey, theme);
-      applyTheme(theme);
+      applyThemePreference(theme || 'light');
     });
-  });
-
-  applyThemePreference();
-}
-
-if (dropdown && dropdownMenu && dropdownToggle) {
-  dropdownToggle.addEventListener('click', () => {
-    dropdownMenu.classList.toggle('show');
-  });
-
-  document.addEventListener('click', (event) => {
-    if (!dropdown.contains(event.target)) {
-      dropdownMenu.classList.remove('show');
-    }
   });
 }
 
 if (authLaunchers.length && authModal) {
   authLaunchers.forEach((trigger) => {
     trigger.addEventListener('click', () => {
-      showAuthPanel('signin');
+      const panel = trigger.getAttribute('data-open-auth') || 'signin';
+      showAuthPanel(panel);
     });
   });
 }
