@@ -31,10 +31,26 @@
        <a href="Help.html">Help</a>
     </nav>
 
-    <!-- Single Dark Mode button -->
-    <button id="themeBtn" class="theme-toggle">
-      Dark Mode
-    </button>
+    <!-- Profile dropdown replaces the old theme button so users get quick account and display controls. -->
+    <div class="profile-menu" style="position: relative;"> <!-- This wrapper positions the dropdown panel so it anchors to the avatar. -->
+      <details class="user-menu" style="position: relative;"> <!-- This <details> element provides a native toggle for the menu without extra JS. -->
+        <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;"> <!-- This summary shows the avatar chip and current mode text so users know what will open. -->
+          <span class="avatar-chip" style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span> <!-- This avatar chip gives a SaaS-like profile affordance without altering the color system. -->
+          <span id="themeModeLabel" style="font-weight: 600;">Light</span> <!-- This label mirrors the active display mode so the dropdown state is obvious. -->
+        </summary>
+        <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 210px; z-index: 30;"> <!-- This panel holds account links and display options while floating above the header. -->
+          <a href="Account.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Account</a> <!-- This link sends users to account settings from the header. -->
+          <a href="Settings.html" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Preferences</a> <!-- This link quickly opens preferences without changing the nav layout. -->
+          <div style="padding: 8px 10px; border-radius: 8px; background: #f8fafc; margin: 6px 0;"> <!-- This block groups display choices to mirror SaaS dropdown patterns. -->
+            <p style="margin: 0 0 6px 0; font-weight: 700;">Display</p> <!-- This label clarifies the following buttons are display options. -->
+            <button type="button" data-theme-option="light" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Light</button> <!-- This button sets light mode through JS while matching the dropdown styling. -->
+            <button type="button" data-theme-option="dark" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Dark</button> <!-- This button switches to dark mode without changing the color tokens. -->
+            <button type="button" data-theme-option="system" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff;">System</button> <!-- This button mirrors the OS theme so users can follow their device preference. -->
+          </div>
+          <a href="#" style="display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit;">Log Out</a> <!-- This placeholder log-out action keeps the menu aligned with SaaS expectations. -->
+        </div>
+      </details>
+    </div>
   </header>
 
   <!-- HERO -->
