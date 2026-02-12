@@ -38,7 +38,7 @@
   </header>
 
   <!-- HERO -->
-  <section class="hero">
+  <section id="hero" class="hero"> <!-- Added hero anchor id so nav CTAs can jump to the single demo area after removing the duplicate demo section. -->
     <div class="container hero-inner">
       <div class="hero-copy">
         <h1>Smart Filtering in Action</h1>
@@ -47,8 +47,8 @@
         </p>
 
         <div class="cta-row">
-          <a class="btn btn-primary" href="#how">Get Started</a>
-          <a class="btn btn-ghost" href="#demo">Watch Demo</a>
+          <a class="btn btn-primary" href="#how">Get Started</a> <!-- Kept Get Started link unchanged because it still points to the how-it-works section. -->
+          <a class="btn btn-ghost" href="#hero">Watch Demo</a> <!-- Updated demo link to target the hero video since the duplicate demo section was removed. -->
         </div>
       </div>
 
@@ -87,13 +87,7 @@
     </div>
   </section>
 
-  <!-- Demo -->
-  <section id="demo" class="section alt">
-    <div class="container">
-      <h2 class="section-title">See it in action</h2>
-      <p>Short demo video or animated GIF goes here.</p>
-    </div>
-  </section>
+  <!-- Removed the “See it in action” section to prevent duplicate demo areas; the only demo video lives in the hero preview. -->
   <!-- ISweep AI Test Area -->
 <section id="isweep-test" style="max-width: 600px; margin: 2rem auto;">
   <h2>ISweep AI Demo</h2>
