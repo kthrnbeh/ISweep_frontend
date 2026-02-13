@@ -9,7 +9,7 @@ const accountSummary = authModal ? authModal.querySelector('#accountSummary') : 
 const signInForm = authModal ? authModal.querySelector('#signInForm') : null; // Points to the sign-in form for submit handling.
 const createAccountForm = authModal ? authModal.querySelector('#createAccountForm') : null; // Points to the create-account form for submit handling.
 const themeButtons = document.querySelectorAll('[data-theme-option]'); // Collects all theme option buttons to wire click handlers.
-const themeModeLabel = document.getElementById("themeModeLabel"); // Locates the visible theme label in the header for live updates.
+const themeToggle = document.getElementById('themeToggle'); // Locates the compact header theme toggle button for quick switching.
 const signedInBlock = document.querySelector('[data-auth-signed-in]'); // Finds the signed-in menu block to toggle visibility.
 const signedOutBlock = document.querySelector('[data-auth-signed-out]'); // Finds the signed-out menu block to toggle visibility.
 const authLaunchers = document.querySelectorAll('[data-open-auth]'); // Finds buttons that open the auth modal in specific modes.
@@ -40,9 +40,10 @@ function applyThemePreference(preference) { // Applies the requested theme and u
   document.documentElement.setAttribute('data-theme', resolvedTheme); // Sets data attribute so CSS can react if needed.
   localStorage.setItem(themePreferenceKey, preference); // Persists the chosen preference for future visits.
 
-  if (themeModeLabel) { // Guard label to avoid null errors on pages without it.
-    const label = preference === 'system' ? 'System' : resolvedTheme === 'dark' ? 'Dark' : 'Light'; // Picks readable label text.
-    themeModeLabel.textContent = label; // Updates the header label to reflect the active theme.
+  if (themeToggle) { // Guard icon toggle to avoid null errors on pages without it.
+    const icon = resolvedTheme === 'dark' ? '🌙' : '☀️'; // Picks an icon that represents the active theme.
+    themeToggle.textContent = icon; // Updates the header toggle to show the active theme icon.
+    themeToggle.setAttribute('aria-label', `Toggle theme (current ${resolvedTheme})`); // Keeps accessible label in sync without showing text visually.
   }
 
   themeButtons.forEach((button) => { // Syncs pressed state on every theme button.
@@ -95,6 +96,14 @@ function fakeAuthApi(payload) { // Simulates async auth until real endpoints exi
 
 const savedThemePreference = localStorage.getItem(themePreferenceKey) || 'light'; // Reads persisted theme or defaults to light.
 applyThemePreference(savedThemePreference); // Applies saved theme immediately to avoid flash.
+
+if (themeToggle) { // Bind quick header toggle when present.
+  themeToggle.addEventListener('click', () => { // Switches theme on button click.
+    const current = localStorage.getItem(themePreferenceKey) || 'light'; // Reads current stored preference to decide next.
+    const next = current === 'dark' ? 'light' : 'dark'; // Flips between light and dark for quick toggle.
+    applyThemePreference(next); // Applies the new preference and updates storage/icon.
+  });
+}
 
 if (themeButtons.length) { // Only bind if theme buttons are present.
   themeButtons.forEach((button) => { // Attach click to each theme option.
