@@ -1,6 +1,7 @@
 const CURRENT_PLAN_KEY = "currentPlan"; // Stores the selected plan in localStorage so plan info persists.
 const SETTINGS_KEY = "isweep-settings"; // Stores settings payloads in localStorage for the settings page demo.
 const themePreferenceKey = 'isweep-theme'; // Stores the user’s theme preference so it survives reloads.
+const themeLabelMap = { light: 'Light', dark: 'Dark', system: 'System' }; // Maps preference keys to human-friendly labels for the dropdown text.
 const authStateKey = 'auth-state'; // Stores { name, email, token } as a placeholder auth state until backend exists.
 const authModal = document.getElementById('authModal'); // Grabs the auth modal container if present on the page.
 const authBackdrop = authModal ? authModal.querySelector('.auth-backdrop') : null; // Finds the backdrop to support outside-click close.
@@ -9,12 +10,15 @@ const accountSummary = authModal ? authModal.querySelector('#accountSummary') : 
 const signInForm = authModal ? authModal.querySelector('#signInForm') : null; // Points to the sign-in form for submit handling.
 const createAccountForm = authModal ? authModal.querySelector('#createAccountForm') : null; // Points to the create-account form for submit handling.
 const themeButtons = document.querySelectorAll('[data-theme-option]'); // Collects all theme option buttons to wire click handlers.
-const themeToggle = document.getElementById('themeToggle'); // Locates the compact header theme toggle button for quick switching.
+const dropdownThemeToggle = document.querySelector('[data-theme-toggle]'); // Locates the dropdown theme toggle row now that the header button is removed.
+const dropdownThemeIcon = dropdownThemeToggle ? dropdownThemeToggle.querySelector('[data-theme-icon]') : null; // Points to the icon span so we can swap sun/moon visuals.
+const dropdownThemeLabel = dropdownThemeToggle ? dropdownThemeToggle.querySelector('[data-theme-label]') : null; // Points to the text span so we can show the current theme label.
 const signedInBlock = document.querySelector('[data-auth-signed-in]'); // Finds the signed-in menu block to toggle visibility.
 const signedOutBlock = document.querySelector('[data-auth-signed-out]'); // Finds the signed-out menu block to toggle visibility.
 const authLaunchers = document.querySelectorAll('[data-open-auth]'); // Finds buttons that open the auth modal in specific modes.
 const authSwitchers = document.querySelectorAll('[data-switch-auth]'); // Finds buttons that switch between auth panels inside the modal.
 const logoutButtons = document.querySelectorAll('[data-logout]'); // Finds logout triggers in both modal and dropdown so we clear auth consistently.
+const userMenu = document.querySelector('.user-menu'); // Grabs the dropdown element so we can close it after actions.
 const authState = { // Lightweight helper to manage auth data in localStorage until a backend exists.
   get() { // Reads auth state from storage to know if the user is signed in.
     try { // Protects against JSON parsing errors so the UI does not crash.
@@ -40,10 +44,12 @@ function applyThemePreference(preference) { // Applies the requested theme and u
   document.documentElement.setAttribute('data-theme', resolvedTheme); // Sets data attribute so CSS can react if needed.
   localStorage.setItem(themePreferenceKey, preference); // Persists the chosen preference for future visits.
 
-  if (themeToggle) { // Guard icon toggle to avoid null errors on pages without it.
+  if (dropdownThemeToggle) { // Guard dropdown toggle to avoid null errors on pages without it.
     const icon = resolvedTheme === 'dark' ? '🌙' : '☀️'; // Picks an icon that represents the active theme.
-    themeToggle.textContent = icon; // Updates the header toggle to show the active theme icon.
-    themeToggle.setAttribute('aria-label', `Toggle theme (current ${resolvedTheme})`); // Keeps accessible label in sync without showing text visually.
+    const label = themeLabelMap[preference] || themeLabelMap[resolvedTheme] || 'Light'; // Chooses a friendly label based on preference or resolved theme.
+    if (dropdownThemeIcon) dropdownThemeIcon.textContent = icon; // Updates the icon span so users see sun/moon inside the dropdown.
+    if (dropdownThemeLabel) dropdownThemeLabel.textContent = `Theme: ${label}`; // Updates the text so users know the current mode from the menu.
+    dropdownThemeToggle.setAttribute('aria-label', `Toggle theme (current ${label})`); // Keeps the toggle accessible with the latest mode label.
   }
 
   themeButtons.forEach((button) => { // Syncs pressed state on every theme button.
@@ -97,11 +103,11 @@ function fakeAuthApi(payload) { // Simulates async auth until real endpoints exi
 const savedThemePreference = localStorage.getItem(themePreferenceKey) || 'light'; // Reads persisted theme or defaults to light.
 applyThemePreference(savedThemePreference); // Applies saved theme immediately to avoid flash.
 
-if (themeToggle) { // Bind quick header toggle when present.
-  themeToggle.addEventListener('click', () => { // Switches theme on button click.
+if (dropdownThemeToggle) { // Bind dropdown toggle so theme can change from inside the menu.
+  dropdownThemeToggle.addEventListener('click', () => { // Switches theme on button click in the dropdown.
     const current = localStorage.getItem(themePreferenceKey) || 'light'; // Reads current stored preference to decide next.
     const next = current === 'dark' ? 'light' : 'dark'; // Flips between light and dark for quick toggle.
-    applyThemePreference(next); // Applies the new preference and updates storage/icon.
+    applyThemePreference(next); // Applies the new preference and updates storage/icon/label.
   });
 }
 
@@ -138,6 +144,7 @@ if (logoutButtons.length) { // Bind logout across modal and dropdown.
       authState.clear(); // Clears stored auth data to sign out.
       syncAuthUI(); // Refreshes UI to signed-out state.
       closeAuth(); // Closes modal if it is open.
+      if (userMenu) userMenu.open = false; // Closes the dropdown so the menu resets after signing out.
     });
   });
 }

@@ -28,11 +28,12 @@
       <!-- Profile dropdown now holds auth actions and display options since the Account nav link is removed. -->
       <div class="profile-menu" style="position: relative;"> <!-- This wrapper anchors the dropdown panel to the avatar spot without altering the header grid. -->
         <details class="user-menu" style="position: relative;"> <!-- This details element provides native open/close behavior so no extra JS is needed for toggling. -->
-          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;"> <!-- This summary shows the avatar chip for profile access without exposing theme text. -->
-            <button id="themeToggle" aria-label="Toggle theme" style="width: 34px; height: 34px; border-radius: 999px; border: 1px solid #e5e7eb; background: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer;">☀️</button> <!-- This compact icon button toggles the theme without showing "Light/Dark" text. -->
+          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;"> <!-- This summary now only shows the avatar so the header stays clean while theme lives inside the dropdown. -->
+            <!-- Removed the standalone theme button so theme controls live inside the KB dropdown for a cleaner header. -->
             <span class="avatar-chip" data-avatar-chip style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span> <!-- This avatar chip provides a professional profile handle while keeping the existing palette. -->
           </summary>
           <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 230px; z-index: 30;"> <!-- This panel holds auth links and theme options in one place. -->
+            <button type="button" data-theme-toggle style="display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff; margin-bottom: 8px;" aria-live="polite"> <span data-theme-icon>☀️</span><span data-theme-label style="margin-left: 4px;">Theme: Light</span> </button> <!-- This inline row keeps the theme toggle inside the dropdown so users change mode without cluttering the header. -->
             <div data-auth-signed-out style="display: grid; gap: 6px;"> <!-- This block shows when signed out so users can authenticate. -->
               <button type="button" data-open-auth="signin" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Sign In</button> <!-- This button opens the modal in sign-in mode for existing users. -->
               <button type="button" data-open-auth="create" style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Create Account</button> <!-- This button opens the modal in create-account mode for new users. -->
@@ -50,7 +51,7 @@
                 <button type="button" data-theme-option="dark" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; background: #ffffff;">Dark</button> <!-- This option switches to dark mode while keeping tokens unchanged. -->
                 <button type="button" data-theme-option="system" style="display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff;">System</button> <!-- This option follows the OS preference for theme. -->
               </div>
-              <button type="button" data-logout style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Log Out</button> <!-- This button clears auth state and refreshes the UI when selected. -->
+              <button type="button" data-logout style="display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff;">Sign Out</button> <!-- This button clears auth state and refreshes the UI when selected with the updated label. -->
             </div>
           </div>
         </details>
