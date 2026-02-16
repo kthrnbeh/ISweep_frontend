@@ -43,6 +43,16 @@ LocalStorage for frontend state
 
 Fully static — no build tools required
 
+HOW TO RUN LOCALLY
+- Open `docs/index.html` with VS Code Live Server (right-click → Open with Live Server) → http://127.0.0.1:5500/docs/
+- Ensure backend is running at http://127.0.0.1:5000 so login/preferences work.
+- Use the nav to Settings/Account to sign up/login and adjust preferences; settings persist to backend via GET/PUT /preferences.
+
+YouTube smoke test (with extension)
+- Load Chrome extension from ISweep_extention/ and set backend URL to http://127.0.0.1:5000 in Options.
+- Log in via extension popup with the same email/password used here.
+- Open a YouTube video with captions enabled; watch DevTools console for [ISWEEP][YT]/[ISWEEP][BG] logs and confirm mute/skip/fast_forward actions apply.
+
 📁 Project Structure
 ISweep/
 │
