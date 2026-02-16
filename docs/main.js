@@ -494,8 +494,9 @@ async function fetchPreferencesFromBackend() {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      console.warn('[ISWEEP][FE] /preferences GET failed', res.status);
-      throw new Error(await res.text());
+      const msg = await res.text();
+      console.warn('[ISWEEP][FE] /preferences failed', res.status, msg || '');
+      throw new Error(msg || 'Failed to load preferences');
     }
     const prefs = await res.json();
     console.log('[ISWEEP][FE] /preferences success', res.status);
@@ -509,7 +510,10 @@ async function fetchPreferencesFromBackend() {
 
 async function persistPreferences(preferences) {
   const token = localStorage.getItem(tokenStorageKey);
-  if (!token) throw new Error('Missing auth token');
+  if (!token) {
+    console.warn('[ISWEEP][FE] missing auth token; saved locally');
+    throw new Error('Missing auth token');
+  }
 
   console.log('[ISWEEP][FE] saving preferences...', getBackendUrl());
   const res = await fetch(`${getBackendUrl()}/preferences`, {
@@ -523,7 +527,7 @@ async function persistPreferences(preferences) {
 
   if (!res.ok) {
     const message = await res.text();
-    console.warn('[ISWEEP][FE] /preferences PUT failed', res.status);
+    console.warn('[ISWEEP][FE] /preferences failed', res.status, message || '');
     throw new Error(message || 'Failed to save preferences');
   }
   const prefs = await res.json();
