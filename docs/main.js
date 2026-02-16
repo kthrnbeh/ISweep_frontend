@@ -541,9 +541,11 @@ async function loadPreferencesUiState() {
 
   const cachedPrefs = loadPreferencesFromCache();
   if (cachedPrefs) {
+    console.log('[ISWEEP][FE] falling back to cached preferences');
     return preferencesToUi(cachedPrefs);
   }
 
+  console.log('[ISWEEP][FE] falling back to local settings storage');
   return loadSettingsFromStorage();
 }
 
