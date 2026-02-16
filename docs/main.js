@@ -3,6 +3,11 @@ const SETTINGS_KEY = "isweep-settings"; // Stores settings payloads in localStor
 const themePreferenceKey = 'isweep-theme'; // Stores the user’s theme preference so it survives reloads.
 const themeLabelMap = { light: 'Light', dark: 'Dark', system: 'System' }; // Maps preference keys to human-friendly labels for the dropdown text.
 const authStateKey = 'auth-state'; // Stores { name, email, token } as a placeholder auth state until backend exists.
+const backendUrlKey = 'isweep-backend-url'; // Allows overriding the backend URL for local dev.
+const tokenStorageKey = 'isweep-token'; // Stores auth token from backend.
+const userIdStorageKey = 'isweep-user-id'; // Stores user id returned by backend.
+const preferencesCacheKey = 'isweep-preferences'; // Caches preferences for offline fallback.
+const BACKEND_DEFAULT = 'http://127.0.0.1:5000';
 const authModal = document.getElementById('authModal'); // Grabs the auth modal container if present on the page.
 const authBackdrop = authModal ? authModal.querySelector('.auth-backdrop') : null; // Finds the backdrop to support outside-click close.
 const authPanels = authModal ? authModal.querySelectorAll('[data-auth-panel]') : []; // Collects auth panels so we can toggle sign-in/create/account views.
@@ -36,6 +41,11 @@ const authState = { // Lightweight helper to manage auth data in localStorage un
     localStorage.removeItem(authStateKey); // Clears the stored auth entry.
   },
 };
+
+function getBackendUrl() {
+  const override = localStorage.getItem(backendUrlKey);
+  return override || BACKEND_DEFAULT;
+}
 
 function applyThemePreference(preference) { // Applies the requested theme and updates UI/state.
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; // Detects OS dark mode for system selection.
@@ -470,18 +480,21 @@ async function fetchPreferencesFromBackend() {
   if (!token) return null;
 
   try {
+    console.log('[ISWEEP][FE] loading preferences...', getBackendUrl());
     const res = await fetch(`${getBackendUrl()}/preferences`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
+      console.warn('[ISWEEP][FE] /preferences GET failed', res.status);
       throw new Error(await res.text());
     }
     const prefs = await res.json();
+    console.log('[ISWEEP][FE] /preferences success', res.status);
     cachePreferences(prefs);
     return prefs;
   } catch (err) {
-    console.warn('[ISWEEP] Failed to fetch preferences from backend', err);
+    console.warn('[ISWEEP][FE] Failed to fetch preferences from backend', err);
     return null;
   }
 }
@@ -490,6 +503,7 @@ async function persistPreferences(preferences) {
   const token = localStorage.getItem(tokenStorageKey);
   if (!token) throw new Error('Missing auth token');
 
+  console.log('[ISWEEP][FE] saving preferences...', getBackendUrl());
   const res = await fetch(`${getBackendUrl()}/preferences`, {
     method: 'PUT',
     headers: {
@@ -501,11 +515,13 @@ async function persistPreferences(preferences) {
 
   if (!res.ok) {
     const message = await res.text();
+    console.warn('[ISWEEP][FE] /preferences PUT failed', res.status);
     throw new Error(message || 'Failed to save preferences');
   }
   const prefs = await res.json();
+  console.log('[ISWEEP][FE] /preferences success', res.status);
   cachePreferences(prefs);
-  return prefs;
+  return { prefs, status: res.status };
 }
 
 async function fetchAndCachePreferences() {
