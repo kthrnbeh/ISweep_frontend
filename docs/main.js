@@ -549,146 +549,11 @@ async function loadPreferencesUiState() {
   return loadSettingsFromStorage();
 }
 
-// Map select value -> backend action + duration
-function mapAction(selectValue, defaultDurationSeconds) {
-  switch (selectValue) {
-    case "mute":
-      return { action: "mute", duration_seconds: defaultDurationSeconds };
-    case "skip":
-      return { action: "skip", duration_seconds: defaultDurationSeconds };
-    case "fast-forward":
-      // Backend uses "fast_forward" with underscore
-      return { action: "fast_forward", duration_seconds: defaultDurationSeconds };
-    case "log-only":
-    default:
-      // "Log only" means no actual action, just logs
-      return { action: "none", duration_seconds: 0 };
-  }
-}
-
-function mapSensitivityValue(sliderValue) {
-  switch (Number(sliderValue || 2)) {
-    case 1:
-      return "low";
-    case 3:
-      return "high";
-    default:
-      return "medium";
-  }
-}
-
-function buildPreferencesPayload(settings) {
-  const userId = currentUserId();
-  const languageActionInfo = mapAction(settings.action_profanity || "mute", 4);
-  const sexualActionInfo = mapAction(settings.action_sexual || "skip", 30);
-  const violenceActionInfo = mapAction(settings.action_violence || "skip", 15);
-
-  const sensitivity = mapSensitivityValue(settings.sensitivity || 2);
-
-  return {
-    user_id: userId,
-    language_filter: !!settings.filter_profanity,
-    sexual_content_filter: !!settings.filter_sexual,
-    violence_filter: !!settings.filter_violence,
-    language_sensitivity: sensitivity,
-    sexual_content_sensitivity: sensitivity,
-    violence_sensitivity: sensitivity,
-    actions: {
-      language: languageActionInfo,
-      sexual: sexualActionInfo,
-      violence: violenceActionInfo,
-    },
-    blocked_words: settings.blocked_words || ["badword", "dummy", "oh my god"],
-  };
-}
-
-// Push preferences to backend using the shared API helper (falls back to fetch errors if offline).
-async function pushPreferencesToBackend(settings) {
-  const payload = buildPreferencesPayload(settings);
-  const userId = payload.user_id;
-  if (window.ISweepApi && window.ISweepApi.putPreferences) {
-    return window.ISweepApi.putPreferences(userId, payload);
-  }
-  // Fallback if helper is missing (should not happen in normal flow).
-  const res = await fetch(`${ISWEEP_API_BASE}/preferences`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${userId}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`Failed to save preferences: ${res.status}`);
-  const json = await res.json();
-  return json.preferences || payload;
-}
-
-// Pull preferences from backend; uses helper when available for consistency.
-async function pullPreferencesFromBackend() {
-  const userId = currentUserId();
-  if (window.ISweepApi && window.ISweepApi.getPreferences) {
-    return window.ISweepApi.getPreferences(userId);
-  }
-  const res = await fetch(`${ISWEEP_API_BASE}/preferences?user_id=${encodeURIComponent(userId)}`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${userId}` },
-  });
-  if (!res.ok) throw new Error(`Failed to load preferences: ${res.status}`);
-  const json = await res.json();
-  return json.preferences || {};
-}
-
-function sensitivityToSliderValue(sensitivity) {
-  if (sensitivity === "low") return 1;
-  if (sensitivity === "high") return 3;
-  return 2;
-}
-
-function actionToSelectValue(action) {
-  if (action === "fast_forward") return "fast-forward";
-  if (action === "skip") return "skip";
-  if (action === "mute") return "mute";
-  return "log-only";
-}
-
-function mergeBackendPrefsIntoSettings(settings, prefs) {
-  const merged = { ...settings };
-  merged.filter_profanity = prefs.language_filter ?? merged.filter_profanity ?? true;
-  merged.filter_sexual = prefs.sexual_content_filter ?? merged.filter_sexual ?? true;
-  merged.filter_violence = prefs.violence_filter ?? merged.filter_violence ?? false;
-
-  const actions = prefs.actions || {};
-  merged.action_profanity = actionToSelectValue(actions.language?.action) || merged.action_profanity || "mute";
-  merged.action_sexual = actionToSelectValue(actions.sexual?.action) || merged.action_sexual || "skip";
-  merged.action_violence = actionToSelectValue(actions.violence?.action) || merged.action_violence || "skip";
-
-  const sensitivity = prefs.language_sensitivity || prefs.sexual_content_sensitivity || prefs.violence_sensitivity;
-  if (sensitivity) {
-    merged.sensitivity = sensitivityToSliderValue(sensitivity);
-  }
-
-  merged.blocked_words = prefs.blocked_words || merged.blocked_words;
-  return merged;
-}
-
-// Attempt to hydrate settings from backend; falls back to provided settings on any failure.
-async function hydrateSettingsFromBackend(settings) {
-  try {
-    const prefs = await pullPreferencesFromBackend();
-    const merged = mergeBackendPrefsIntoSettings(settings, prefs);
-    saveSettingsToStorage(merged);
-    return merged;
-  } catch (err) {
-    console.warn("Backend preferences unavailable, using local settings", err);
-    return settings;
-  }
-}
-
 // -----------------------------------------------------
 // WIRE UP THE SETTINGS PAGE
 // -----------------------------------------------------
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Grab forms (will be null on non-settings pages)
   const contentFiltersForm = document.getElementById("contentFiltersForm");
   const filterActionsForm = document.getElementById("filterActionsForm");
@@ -706,43 +571,44 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Load previously saved settings and prefill the form UI
-  const saved = loadSettingsFromStorage();
+  console.log('[ISWEEP][FE] loading preferences...');
+  let saved = await loadPreferencesUiState();
+  if (!saved || !Object.keys(saved).length) {
+    saved = loadSettingsFromStorage();
+  }
 
-    // --- PREFILL: Content Filters checkboxes ---
-    if (contentFiltersForm) {
-      contentFiltersForm.elements["filter-profanity"].checked =
-        saved.filter_profanity ?? true;
-      contentFiltersForm.elements["filter-sexual"].checked =
-        saved.filter_sexual ?? true;
-      contentFiltersForm.elements["filter-violence"].checked =
-        saved.filter_violence ?? false;
-      contentFiltersForm.elements["filter-horror"].checked =
-        saved.filter_horror ?? false;
-      contentFiltersForm.elements["filter-crude"].checked =
-        saved.filter_crude ?? false;
+  // --- PREFILL: Content Filters checkboxes ---
+  if (contentFiltersForm) {
+    contentFiltersForm.elements["filter-profanity"].checked =
+      saved.filter_profanity ?? true;
+    contentFiltersForm.elements["filter-sexual"].checked =
+      saved.filter_sexual ?? true;
+    contentFiltersForm.elements["filter-violence"].checked =
+      saved.filter_violence ?? false;
+    contentFiltersForm.elements["filter-horror"].checked =
+      saved.filter_horror ?? false;
+    contentFiltersForm.elements["filter-crude"].checked =
+      saved.filter_crude ?? false;
 
-      contentFiltersForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    contentFiltersForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-        saved.filter_profanity =
-          contentFiltersForm.elements["filter-profanity"].checked;
-        saved.filter_sexual =
-          contentFiltersForm.elements["filter-sexual"].checked;
-        saved.filter_violence =
-          contentFiltersForm.elements["filter-violence"].checked;
-        saved.filter_horror =
-          contentFiltersForm.elements["filter-horror"].checked;
-        saved.filter_crude =
-          contentFiltersForm.elements["filter-crude"].checked;
+      saved.filter_profanity =
+        contentFiltersForm.elements["filter-profanity"].checked;
+      saved.filter_sexual = contentFiltersForm.elements["filter-sexual"].checked;
+      saved.filter_violence =
+        contentFiltersForm.elements["filter-violence"].checked;
+      saved.filter_horror = contentFiltersForm.elements["filter-horror"].checked;
+      saved.filter_crude = contentFiltersForm.elements["filter-crude"].checked;
 
-        saveSettingsToStorage(saved);
+      saveSettingsToStorage(saved);
 
       try {
-        await syncFilterPreferencesWithBackend(saved);
+        const prefsPayload = uiToPreferences(saved);
+        await persistPreferences(prefsPayload);
         alert("Content filter categories saved and sent to ISweep.");
       } catch (err) {
-        console.error(err);
+        console.error('[ISWEEP][FE] Failed to save content filters', err);
         alert(
           "Filters saved locally, but backend update failed. Is the API running?"
         );
@@ -750,40 +616,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-    // --- PREFILL: Filter Actions selects ---
-    if (filterActionsForm) {
-      if (saved.action_profanity) {
-        filterActionsForm.elements["action-profanity"].value =
-          saved.action_profanity;
-      }
+  // --- PREFILL: Filter Actions selects ---
+  if (filterActionsForm) {
+    if (saved.action_profanity) {
+      filterActionsForm.elements["action-profanity"].value =
+        saved.action_profanity;
+    }
 
-      if (saved.action_sexual) {
-        filterActionsForm.elements["action-sexual"].value =
-          saved.action_sexual;
-      }
+    if (saved.action_sexual) {
+      filterActionsForm.elements["action-sexual"].value = saved.action_sexual;
+    }
 
-      if (saved.action_violence) {
-        filterActionsForm.elements["action-violence"].value =
-          saved.action_violence;
-      }
+    if (saved.action_violence) {
+      filterActionsForm.elements["action-violence"].value =
+        saved.action_violence;
+    }
 
-      filterActionsForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    filterActionsForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-        saved.action_profanity =
-          filterActionsForm.elements["action-profanity"].value;
-        saved.action_sexual =
-          filterActionsForm.elements["action-sexual"].value;
-        saved.action_violence =
-          filterActionsForm.elements["action-violence"].value;
+      saved.action_profanity =
+        filterActionsForm.elements["action-profanity"].value;
+      saved.action_sexual = filterActionsForm.elements["action-sexual"].value;
+      saved.action_violence =
+        filterActionsForm.elements["action-violence"].value;
 
-        saveSettingsToStorage(saved);
+      saveSettingsToStorage(saved);
 
       try {
-        await syncFilterPreferencesWithBackend(saved);
+        const prefsPayload = uiToPreferences(saved);
+        await persistPreferences(prefsPayload);
         alert("Filter actions saved and sent to ISweep.");
       } catch (err) {
-        console.error(err);
+        console.error('[ISWEEP][FE] Failed to save filter actions', err);
         alert(
           "Actions saved locally, but backend update failed. Is the API running?"
         );
@@ -791,67 +656,67 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-    // --- PREFILL: Sensitivity slider ---
-    if (sensitivityForm) {
-      const sensitivityInput = sensitivityForm.elements["sensitivity"];
-      if (saved.sensitivity) {
-        sensitivityInput.value = saved.sensitivity;
-      }
+  // --- PREFILL: Sensitivity slider ---
+  if (sensitivityForm) {
+    const sensitivityInput = sensitivityForm.elements["sensitivity"];
+    if (saved.sensitivity) {
+      sensitivityInput.value = saved.sensitivity;
+    }
 
-    sensitivityForm.addEventListener("submit", (e) => {
+    sensitivityForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       saved.sensitivity = sensitivityInput.value;
       saveSettingsToStorage(saved);
-      alert("Sensitivity saved.");
+      try {
+        const prefsPayload = uiToPreferences(saved);
+        await persistPreferences(prefsPayload);
+        alert("Sensitivity saved.");
+      } catch (err) {
+        console.error('[ISWEEP][FE] Failed to save sensitivity', err);
+        alert("Sensitivity saved locally, but backend update failed.");
+      }
     });
   }
 
-    // --- PREFILL: Notifications (local only) ---
-    if (notificationsForm) {
-      notificationsForm.elements["notify-email"].checked =
-        saved.notify_email ?? true;
-      notificationsForm.elements["notify-inapp"].checked =
-        saved.notify_inapp ?? true;
-      notificationsForm.elements["notify-none"].checked =
-        saved.notify_none ?? false;
+  // --- PREFILL: Notifications (local only) ---
+  if (notificationsForm) {
+    notificationsForm.elements["notify-email"].checked = saved.notify_email ?? true;
+    notificationsForm.elements["notify-inapp"].checked = saved.notify_inapp ?? true;
+    notificationsForm.elements["notify-none"].checked = saved.notify_none ?? false;
 
-      notificationsForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        saved.notify_email =
-          notificationsForm.elements["notify-email"].checked;
-        saved.notify_inapp =
-          notificationsForm.elements["notify-inapp"].checked;
-        saved.notify_none =
-          notificationsForm.elements["notify-none"].checked;
+    notificationsForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      saved.notify_email = notificationsForm.elements["notify-email"].checked;
+      saved.notify_inapp = notificationsForm.elements["notify-inapp"].checked;
+      saved.notify_none = notificationsForm.elements["notify-none"].checked;
 
-        saveSettingsToStorage(saved);
-        alert("Notification preferences saved.");
-      });
+      saveSettingsToStorage(saved);
+      alert("Notification preferences saved.");
+    });
+  }
+
+  // --- PREFILL: Parental controls (local only) ---
+  if (parentalForm) {
+    const pinInput = parentalForm.elements["parent-pin"];
+    const requirePinCheckbox = parentalForm.elements["require-pin"];
+
+    if (saved.parent_pin) {
+      pinInput.value = saved.parent_pin;
     }
+    requirePinCheckbox.checked = saved.require_pin ?? true;
 
-    // --- PREFILL: Parental controls (local only) ---
-    if (parentalForm) {
-      const pinInput = parentalForm.elements["parent-pin"];
-      const requirePinCheckbox = parentalForm.elements["require-pin"];
+    parentalForm.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-      if (saved.parent_pin) {
-        pinInput.value = saved.parent_pin;
-      }
-      requirePinCheckbox.checked = saved.require_pin ?? true;
+      saved.parent_pin = pinInput.value;
+      saved.require_pin = requirePinCheckbox.checked;
 
-      parentalForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        saved.parent_pin = pinInput.value;
-        saved.require_pin = requirePinCheckbox.checked;
-
-        saveSettingsToStorage(saved);
-        alert(
-          "Parental PIN saved locally. (In a real app, this would be stored securely on the server.)"
-        );
-      });
-    }
-  })();
+      saveSettingsToStorage(saved);
+      alert(
+        "Parental PIN saved locally. (In a real app, this would be stored securely on the server.)"
+      );
+    });
+  }
 });
 
 //-----------------------------------------------------
