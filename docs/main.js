@@ -324,7 +324,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   try {
     const planData = localStorage.getItem(CURRENT_PLAN_KEY);
-    const plan = planData ? JSON.parse(planData) : null;
+    // Some legacy values may be plain strings; treat them gracefully instead of throwing.
+    const plan = planData ? (JSON.parse(planData || 'null') || { label: planData }) : null;
     const planLabel = plan ? plan.label : "No plan selected yet";
 
     if (displayElement) displayElement.textContent = planLabel;
