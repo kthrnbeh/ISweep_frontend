@@ -3,11 +3,6 @@ const SETTINGS_KEY = "isweep-settings"; // Stores settings payloads in localStor
 const themePreferenceKey = 'isweep-theme'; // Stores the user’s theme preference so it survives reloads.
 const themeLabelMap = { light: 'Light', dark: 'Dark', system: 'System' }; // Maps preference keys to human-friendly labels for the dropdown text.
 const authStateKey = 'auth-state'; // Stores { name, email, token } as a placeholder auth state until backend exists.
-const backendUrlKey = 'isweep-backend-url'; // Allows overriding the backend URL for local dev.
-const tokenStorageKey = 'isweep-token'; // Stores auth token from backend.
-const userIdStorageKey = 'isweep-user-id'; // Stores user id returned by backend.
-const preferencesCacheKey = 'isweep-preferences'; // Caches preferences for offline fallback.
-const BACKEND_DEFAULT = 'http://127.0.0.1:5000';
 const authModal = document.getElementById('authModal'); // Grabs the auth modal container if present on the page.
 const authBackdrop = authModal ? authModal.querySelector('.auth-backdrop') : null; // Finds the backdrop to support outside-click close.
 const authPanels = authModal ? authModal.querySelectorAll('[data-auth-panel]') : []; // Collects auth panels so we can toggle sign-in/create/account views.
@@ -41,11 +36,6 @@ const authState = { // Lightweight helper to manage auth data in localStorage un
     localStorage.removeItem(authStateKey); // Clears the stored auth entry.
   },
 };
-
-function getBackendUrl() {
-  const override = localStorage.getItem(backendUrlKey);
-  return override || BACKEND_DEFAULT;
-}
 
 function applyThemePreference(preference) { // Applies the requested theme and updates UI/state.
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; // Detects OS dark mode for system selection.
@@ -558,82 +548,122 @@ function mapAction(selectValue, defaultDurationSeconds) {
   }
 }
 
-// Send a single preference object to /preferences
-async function sendPreferenceToBackend(prefBody) {
-  const res = await fetch(`${ISWEEP_API_BASE}/preferences`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(prefBody),
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to save preference: " + (await res.text()));
+function mapSensitivityValue(sliderValue) {
+  switch (Number(sliderValue || 2)) {
+    case 1:
+      return "low";
+    case 3:
+      return "high";
+    default:
+      return "medium";
   }
 }
 
-// Build and send preferences for language/sexual/violence
-async function syncFilterPreferencesWithBackend(settings) {
-  // If backend isn't running, these will just error and we log it.
-  const tasks = [];
+function buildPreferencesPayload(settings) {
+  const userId = currentUserId();
+  const languageActionInfo = mapAction(settings.action_profanity || "mute", 4);
+  const sexualActionInfo = mapAction(settings.action_sexual || "skip", 30);
+  const violenceActionInfo = mapAction(settings.action_violence || "skip", 15);
 
-  // 1) Profanity → ContentType.language
-  const languageEnabled = !!settings.filter_profanity;
-  const languageActionInfo = mapAction(
-    settings.action_profanity || "mute",
-    4 // seconds (matches earlier demo)
-  );
-  tasks.push(
-    sendPreferenceToBackend({
-      user_id: ISWEEP_USER_ID,
-      content_type: "language",
-      enabled: languageEnabled,
-      action: languageActionInfo.action,
-      duration_seconds: languageActionInfo.duration_seconds,
-      blocked_words: [
-        "badword",
-        "dummy",
-        "oh my god"
-        // Later this list can come from another Settings panel
-      ],
-    })
-  );
+  const sensitivity = mapSensitivityValue(settings.sensitivity || 2);
 
-  // 2) Sexual content → ContentType.sexual
-  const sexualEnabled = !!settings.filter_sexual;
-  const sexualActionInfo = mapAction(
-    settings.action_sexual || "skip",
-    30 // seconds, matches your "Fast-forward 30 seconds" option
-  );
-  tasks.push(
-    sendPreferenceToBackend({
-      user_id: ISWEEP_USER_ID,
-      content_type: "sexual",
-      enabled: sexualEnabled,
-      action: sexualActionInfo.action,
-      duration_seconds: sexualActionInfo.duration_seconds,
-      blocked_words: [], // Not word-based; backend can detect by type later
-    })
-  );
+  return {
+    user_id: userId,
+    language_filter: !!settings.filter_profanity,
+    sexual_content_filter: !!settings.filter_sexual,
+    violence_filter: !!settings.filter_violence,
+    language_sensitivity: sensitivity,
+    sexual_content_sensitivity: sensitivity,
+    violence_sensitivity: sensitivity,
+    actions: {
+      language: languageActionInfo,
+      sexual: sexualActionInfo,
+      violence: violenceActionInfo,
+    },
+    blocked_words: settings.blocked_words || ["badword", "dummy", "oh my god"],
+  };
+}
 
-  // 3) Violence → ContentType.violence
-  const violenceEnabled = !!settings.filter_violence;
-  const violenceActionInfo = mapAction(
-    settings.action_violence || "skip",
-    15 // seconds, matches your "Fast-forward 15 seconds" option
-  );
-  tasks.push(
-    sendPreferenceToBackend({
-      user_id: ISWEEP_USER_ID,
-      content_type: "violence",
-      enabled: violenceEnabled,
-      action: violenceActionInfo.action,
-      duration_seconds: violenceActionInfo.duration_seconds,
-      blocked_words: [],
-    })
-  );
+// Push preferences to backend using the shared API helper (falls back to fetch errors if offline).
+async function pushPreferencesToBackend(settings) {
+  const payload = buildPreferencesPayload(settings);
+  const userId = payload.user_id;
+  if (window.ISweepApi && window.ISweepApi.putPreferences) {
+    return window.ISweepApi.putPreferences(userId, payload);
+  }
+  // Fallback if helper is missing (should not happen in normal flow).
+  const res = await fetch(`${ISWEEP_API_BASE}/preferences`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userId}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`Failed to save preferences: ${res.status}`);
+  const json = await res.json();
+  return json.preferences || payload;
+}
 
-  // Run all three calls
-  await Promise.all(tasks);
+// Pull preferences from backend; uses helper when available for consistency.
+async function pullPreferencesFromBackend() {
+  const userId = currentUserId();
+  if (window.ISweepApi && window.ISweepApi.getPreferences) {
+    return window.ISweepApi.getPreferences(userId);
+  }
+  const res = await fetch(`${ISWEEP_API_BASE}/preferences?user_id=${encodeURIComponent(userId)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${userId}` },
+  });
+  if (!res.ok) throw new Error(`Failed to load preferences: ${res.status}`);
+  const json = await res.json();
+  return json.preferences || {};
+}
+
+function sensitivityToSliderValue(sensitivity) {
+  if (sensitivity === "low") return 1;
+  if (sensitivity === "high") return 3;
+  return 2;
+}
+
+function actionToSelectValue(action) {
+  if (action === "fast_forward") return "fast-forward";
+  if (action === "skip") return "skip";
+  if (action === "mute") return "mute";
+  return "log-only";
+}
+
+function mergeBackendPrefsIntoSettings(settings, prefs) {
+  const merged = { ...settings };
+  merged.filter_profanity = prefs.language_filter ?? merged.filter_profanity ?? true;
+  merged.filter_sexual = prefs.sexual_content_filter ?? merged.filter_sexual ?? true;
+  merged.filter_violence = prefs.violence_filter ?? merged.filter_violence ?? false;
+
+  const actions = prefs.actions || {};
+  merged.action_profanity = actionToSelectValue(actions.language?.action) || merged.action_profanity || "mute";
+  merged.action_sexual = actionToSelectValue(actions.sexual?.action) || merged.action_sexual || "skip";
+  merged.action_violence = actionToSelectValue(actions.violence?.action) || merged.action_violence || "skip";
+
+  const sensitivity = prefs.language_sensitivity || prefs.sexual_content_sensitivity || prefs.violence_sensitivity;
+  if (sensitivity) {
+    merged.sensitivity = sensitivityToSliderValue(sensitivity);
+  }
+
+  merged.blocked_words = prefs.blocked_words || merged.blocked_words;
+  return merged;
+}
+
+// Attempt to hydrate settings from backend; falls back to provided settings on any failure.
+async function hydrateSettingsFromBackend(settings) {
+  try {
+    const prefs = await pullPreferencesFromBackend();
+    const merged = mergeBackendPrefsIntoSettings(settings, prefs);
+    saveSettingsToStorage(merged);
+    return merged;
+  } catch (err) {
+    console.warn("Backend preferences unavailable, using local settings", err);
+    return settings;
+  }
 }
 
 // -----------------------------------------------------
@@ -641,6 +671,7 @@ async function syncFilterPreferencesWithBackend(settings) {
 // -----------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Grab forms (will be null on non-settings pages)
   const contentFiltersForm = document.getElementById("contentFiltersForm");
   const filterActionsForm = document.getElementById("filterActionsForm");
   const sensitivityForm = document.getElementById("sensitivityForm");
@@ -657,8 +688,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  (async () => {
-    let saved = await loadPreferencesUiState();
+  // Load previously saved settings and prefill the form UI
+  const saved = loadSettingsFromStorage();
 
     // --- PREFILL: Content Filters checkboxes ---
     if (contentFiltersForm) {
@@ -689,18 +720,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         saveSettingsToStorage(saved);
 
-        try {
-          const prefsPayload = uiToPreferences(saved);
-          await persistPreferences(prefsPayload);
-          alert("Content filter categories saved and sent to ISweep.");
-        } catch (err) {
-          console.error('[ISWEEP] Failed to save content filters', err);
-          alert(
-            "Filters saved locally, but backend update failed. Is the API running?"
-          );
-        }
-      });
-    }
+      try {
+        await syncFilterPreferencesWithBackend(saved);
+        alert("Content filter categories saved and sent to ISweep.");
+      } catch (err) {
+        console.error(err);
+        alert(
+          "Filters saved locally, but backend update failed. Is the API running?"
+        );
+      }
+    });
+  }
 
     // --- PREFILL: Filter Actions selects ---
     if (filterActionsForm) {
@@ -731,18 +761,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         saveSettingsToStorage(saved);
 
-        try {
-          const prefsPayload = uiToPreferences(saved);
-          await persistPreferences(prefsPayload);
-          alert("Filter actions saved and sent to ISweep.");
-        } catch (err) {
-          console.error('[ISWEEP] Failed to save filter actions', err);
-          alert(
-            "Actions saved locally, but backend update failed. Is the API running?"
-          );
-        }
-      });
-    }
+      try {
+        await syncFilterPreferencesWithBackend(saved);
+        alert("Filter actions saved and sent to ISweep.");
+      } catch (err) {
+        console.error(err);
+        alert(
+          "Actions saved locally, but backend update failed. Is the API running?"
+        );
+      }
+    });
+  }
 
     // --- PREFILL: Sensitivity slider ---
     if (sensitivityForm) {
@@ -751,20 +780,13 @@ document.addEventListener("DOMContentLoaded", () => {
         sensitivityInput.value = saved.sensitivity;
       }
 
-      sensitivityForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        saved.sensitivity = sensitivityInput.value;
-        saveSettingsToStorage(saved);
-        try {
-          const prefsPayload = uiToPreferences(saved);
-          await persistPreferences(prefsPayload);
-          alert("Sensitivity saved.");
-        } catch (err) {
-          console.error('[ISWEEP] Failed to save sensitivity', err);
-          alert("Sensitivity saved locally, but backend update failed.");
-        }
-      });
-    }
+    sensitivityForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      saved.sensitivity = sensitivityInput.value;
+      saveSettingsToStorage(saved);
+      alert("Sensitivity saved.");
+    });
+  }
 
     // --- PREFILL: Notifications (local only) ---
     if (notificationsForm) {
