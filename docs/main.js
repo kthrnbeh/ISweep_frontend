@@ -8,6 +8,13 @@ const tokenStorageKey = 'isweep-token'; // Stores auth token from backend.
 const userIdStorageKey = 'isweep-user-id'; // Stores user id returned by backend.
 const preferencesCacheKey = 'isweep-preferences'; // Caches preferences for offline fallback.
 const BACKEND_DEFAULT = 'http://127.0.0.1:5000';
+// Migration: copy older camelCase keys into the new kebab-case keys so existing users stay signed in.
+if (!localStorage.getItem(tokenStorageKey) && localStorage.getItem('isweepToken')) {
+  localStorage.setItem(tokenStorageKey, localStorage.getItem('isweepToken'));
+}
+if (!localStorage.getItem(userIdStorageKey) && localStorage.getItem('isweepUserId')) {
+  localStorage.setItem(userIdStorageKey, localStorage.getItem('isweepUserId'));
+}
 const authModal = document.getElementById('authModal'); // Grabs the auth modal container if present on the page.
 const authBackdrop = authModal ? authModal.querySelector('.auth-backdrop') : null; // Finds the backdrop to support outside-click close.
 const authPanels = authModal ? authModal.querySelectorAll('[data-auth-panel]') : []; // Collects auth panels so we can toggle sign-in/create/account views.
@@ -110,7 +117,7 @@ async function callAuthEndpoint(path, payload) {
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
+  if (res.status !== 200 && res.status !== 201) {
     const message = await res.text();
     throw new Error(message || 'Authentication failed');
   }
