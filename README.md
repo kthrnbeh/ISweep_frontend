@@ -44,7 +44,7 @@ LocalStorage for frontend state
 Fully static — no build tools required
 
 HOW TO RUN LOCALLY
-- Open `docs/index.html` with VS Code Live Server (right-click → Open with Live Server) → http://127.0.0.1:5500/docs/
+- Open `docs/index.html` with VS Code Live Server (right-click → Open with Live Server) → http://127.0.0.1:5500/ISweep_frontend/docs/
 - Ensure backend is running at http://127.0.0.1:5000 so login/preferences work.
 - Use the nav to Settings/Account to sign up/login and adjust preferences; settings persist to backend via GET/PUT /preferences.
 
