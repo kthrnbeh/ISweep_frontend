@@ -1,7 +1,7 @@
 const CURRENT_PLAN_KEY = "currentPlan"; // Stores the selected plan in localStorage so plan info persists.
 const SETTINGS_KEY = "isweep-settings"; // Stores settings payloads in localStorage for the settings page demo.
 const themePreferenceKey = 'isweep-theme'; // Stores the user’s theme preference so it survives reloads.
-const themeLabelMap = { light: 'Light', dark: 'Dark', system: 'System' }; // Maps preference keys to human-friendly labels for the dropdown text.
+const themeLabelMap = { light: 'Light Mode', dark: 'Dark Mode' }; // Maps preference keys to human-friendly labels for the dropdown text.
 const authStateKey = 'auth-state'; // Stores { name, email, token } as a placeholder auth state until backend exists.
 const backendUrlKey = 'isweep-backend-url'; // Allows overriding the backend URL for local dev.
 const tokenStorageKey = 'isweep-token'; // Stores auth token from backend.
@@ -78,10 +78,10 @@ const authPanels = authModal ? authModal.querySelectorAll('[data-auth-panel]') :
 const accountSummary = authModal ? authModal.querySelector('#accountSummary') : null; // Targets the account summary text to reflect signed-in user info.
 const signInForm = authModal ? authModal.querySelector('#signInForm') : null; // Points to the sign-in form for submit handling.
 const createAccountForm = authModal ? authModal.querySelector('#createAccountForm') : null; // Points to the create-account form for submit handling.
-const themeButtons = document.querySelectorAll('[data-theme-option]'); // Collects all theme option buttons to wire click handlers.
-const dropdownThemeToggle = document.querySelector('[data-theme-toggle]'); // Locates the dropdown theme toggle row now that the header button is removed.
-const dropdownThemeIcon = dropdownThemeToggle ? dropdownThemeToggle.querySelector('[data-theme-icon]') : null; // Points to the icon span so we can swap sun/moon visuals.
-const dropdownThemeLabel = dropdownThemeToggle ? dropdownThemeToggle.querySelector('[data-theme-label]') : null; // Points to the text span so we can show the current theme label.
+const themeToggleDropdown = document.getElementById('themeToggleDropdown'); // Single theme toggle inside KB dropdown.
+const kbToggle = document.getElementById('kbToggle'); // KB avatar trigger.
+const kbDropdown = document.getElementById('kbDropdown'); // KB dropdown panel.
+const kbWrapper = document.querySelector('.kb-wrapper'); // Wrapper to help with outside-click detection.
 const signedInBlock = document.querySelector('[data-auth-signed-in]'); // Finds the signed-in menu block to toggle visibility.
 const signedOutBlock = document.querySelector('[data-auth-signed-out]'); // Finds the signed-out menu block to toggle visibility.
 const authLaunchers = document.querySelectorAll('[data-open-auth]'); // Finds buttons that open the auth modal in specific modes.
@@ -118,18 +118,11 @@ function applyThemePreference(preference) { // Applies the requested theme and u
   document.documentElement.setAttribute('data-theme', resolvedTheme); // Sets data attribute so CSS can react if needed.
   localStorage.setItem(themePreferenceKey, preference); // Persists the chosen preference for future visits.
 
-  if (dropdownThemeToggle) { // Guard dropdown toggle to avoid null errors on pages without it.
-    const icon = resolvedTheme === 'dark' ? '🌙' : '☀️'; // Picks an icon that represents the active theme.
-    const label = themeLabelMap[preference] || themeLabelMap[resolvedTheme] || 'Light'; // Chooses a friendly label based on preference or resolved theme.
-    if (dropdownThemeIcon) dropdownThemeIcon.textContent = icon; // Updates the icon span so users see sun/moon inside the dropdown.
-    if (dropdownThemeLabel) dropdownThemeLabel.textContent = `Theme: ${label}`; // Updates the text so users know the current mode from the menu.
-    dropdownThemeToggle.setAttribute('aria-label', `Toggle theme (current ${label})`); // Keeps the toggle accessible with the latest mode label.
+  if (themeToggleDropdown) { // Update the dropdown button label to reflect the opposite mode.
+    const label = resolvedTheme === 'dark' ? themeLabelMap.light : themeLabelMap.dark;
+    themeToggleDropdown.textContent = label || 'Toggle Theme';
+    themeToggleDropdown.setAttribute('aria-label', `Switch to ${label || 'alternate'} theme`);
   }
-
-  themeButtons.forEach((button) => { // Syncs pressed state on every theme button.
-    const isSelected = button.getAttribute('data-theme-option') === preference; // Checks if this button matches the chosen preference.
-    button.setAttribute('aria-pressed', isSelected); // Announces selection state for accessibility.
-  });
 }
 
 function showAuthPanel(panel) { // Switches the visible panel in the auth modal.
@@ -196,20 +189,27 @@ function clearSession() {
 const savedThemePreference = localStorage.getItem(themePreferenceKey) || 'light'; // Reads persisted theme or defaults to light.
 applyThemePreference(savedThemePreference); // Applies saved theme immediately to avoid flash.
 
-if (dropdownThemeToggle) { // Bind dropdown toggle so theme can change from inside the menu.
-  dropdownThemeToggle.addEventListener('click', () => { // Switches theme on button click in the dropdown.
+if (themeToggleDropdown) { // Bind dropdown toggle so theme can change from inside the menu.
+  themeToggleDropdown.addEventListener('click', () => { // Switches theme on button click in the dropdown.
     const current = localStorage.getItem(themePreferenceKey) || 'light'; // Reads current stored preference to decide next.
     const next = current === 'dark' ? 'light' : 'dark'; // Flips between light and dark for quick toggle.
-    applyThemePreference(next); // Applies the new preference and updates storage/icon/label.
+    applyThemePreference(next); // Applies the new preference and updates storage/label.
+    if (kbDropdown) kbDropdown.classList.add('hidden'); // Close dropdown after selection.
   });
 }
 
-if (themeButtons.length) { // Only bind if theme buttons are present.
-  themeButtons.forEach((button) => { // Attach click to each theme option.
-    button.addEventListener('click', () => { // Handles theme option selection.
-      const theme = button.getAttribute('data-theme-option'); // Reads requested theme from data attribute.
-      applyThemePreference(theme || 'light'); // Applies chosen theme with light as fallback.
-    });
+if (kbToggle && kbDropdown) { // Wire KB dropdown toggle.
+  kbToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    kbDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (event) => { // Close when clicking outside the KB area.
+    if (!kbWrapper) return;
+    const isInside = kbWrapper.contains(event.target);
+    if (!isInside) {
+      kbDropdown.classList.add('hidden');
+    }
   });
 }
 

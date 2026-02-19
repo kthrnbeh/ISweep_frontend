@@ -69,62 +69,41 @@
 <body>
   <!-- Everything visible to the user goes inside <body>. -->
 
-  <!-- Header / Nav -->
   <header class="site-header">
-    <!-- Top header bar shared with other pages; styled via site-plan.css. -->
-
     <div class="container header-inner">
-      <!-- Wrapper that:
-           - sets a maximum width (container),
-           - aligns logo, nav, and button (header-inner). -->
 
-      <a class="logo-box" href="index.html">
-        <!-- Clickable area linking to the home page.
-             logo-box styles the alignment of image + brand text. -->
+      <div class="nav-left">
+        <a class="logo-box" href="index.html">
+          <img src="images/ISweep.png" alt="ISweep logo" />
+          <strong class="brand">ISweep</strong>
+        </a>
 
-        <img src="images/ISweep.png" alt="ISweep logo" />
-        <!-- Brand logo image. alt text for accessibility. -->
+        <nav class="main-nav-left">
+          <a href="index.html">Home</a>
+          <a href="Filter.html">Filters</a>
+          <a href="Plans.html" class="active">Plans</a>
+        </nav>
+      </div>
 
-        <strong class="brand">ISweep</strong>
-        <!-- Brand name next to the logo. -->
-      </a>
+      <div class="nav-right">
+        <a href="Help.html" class="help-link">Help</a>
 
-      <nav class="main-nav">
-        <a href="index.html">Home</a>
-        <a href="Filter.html">Filters</a>
-        <a href="Plans.html" class ="active">Plans</a>
-        <a href="Help.html">Help</a>
-      </nav>
+        <div class="kb-wrapper">
+          <button id="kbToggle" class="kb-avatar">KB</button>
 
-      <div class="profile-menu" style="position: relative;">
-        <details class="user-menu" style="position: relative;">
-          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;">
-            <span class="avatar-chip" data-avatar-chip style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span>
-          </summary>
-          <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 240px; z-index: 30;">
-            <div class="theme-row" style="display: grid; gap: 8px; margin-bottom: 10px;">
-              <button type="button" data-theme-toggle style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff;" aria-live="polite">
-                <span style="display: inline-flex; align-items: center; gap: 8px;">
-                  <span data-theme-icon>☀️</span>
-                  <span data-theme-label>Theme: Light</span>
-                </span>
-                <span style="color: #94a3b8; font-size: 0.9rem;">▾</span>
-              </button>
-              <div class="theme-options" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;">
-                <button type="button" data-theme-option="light" style="padding: 8px 6px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">Light</button>
-                <button type="button" data-theme-option="dark" style="padding: 8px 6px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">Dark</button>
-                <button type="button" data-theme-option="system" style="padding: 8px 6px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">System</button>
-              </div>
+          <div id="kbDropdown" class="kb-dropdown hidden">
+            <div class="dropdown-section">
+              <button id="themeToggleDropdown">Toggle Theme</button>
             </div>
-            <div class="menu-links" style="display: grid; gap: 8px;">
-              <a href="Account.html" style="display: block; padding: 9px 10px; border-radius: 10px; text-decoration: none; color: inherit; border: 1px solid #e5e7eb;">Account</a>
-              <a href="#" style="display: block; padding: 9px 10px; border-radius: 10px; text-decoration: none; color: inherit; border: 1px solid #e5e7eb;">Billing</a>
-              <a href="Settings.html" style="display: block; padding: 9px 10px; border-radius: 10px; text-decoration: none; color: inherit; border: 1px solid #e5e7eb;">Settings</a>
-              <button type="button" data-logout style="display: block; width: 100%; text-align: left; padding: 9px 10px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff;">Sign Out</button>
+            <div class="dropdown-section">
+              <a href="Account.html">Account</a>
+              <a href="Settings.html">Settings</a>
+              <button id="signOutBtn" data-logout>Sign Out</button>
             </div>
           </div>
-        </details>
+        </div>
       </div>
+
     </div>
   </header>
 

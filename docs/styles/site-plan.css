@@ -69,17 +69,22 @@ body{
 .header-inner{
   display:flex; align-items:center; gap:24px;
   padding:14px 0;
+  justify-content: space-between;
 }
+.nav-left{display:flex; align-items:center; gap:2rem;}
+.main-nav-left{display:flex; gap:1.5rem;}
+.nav-right{display:flex; align-items:center; gap:1.25rem;}
 .logo-box{display:flex; align-items:center; gap:10px; text-decoration:none}
 .logo-box img{height:36px; width:auto}
 .logo-box .brand{font-size:20px; color:var(--brand-2)}
 .main-nav{margin-left:auto; display:flex; gap:20px}
-.main-nav a{
+.main-nav a,
+.main-nav-left a{
   text-decoration:none; color:#1f2937; font-weight:600;
   padding:8px 10px; border-radius:10px;
 }
-.main-nav a:hover{background:#eef2f7}
-.main-nav a.active{color:var(--brand-2)}
+.main-nav a:hover,.main-nav-left a:hover{background:#eef2f7}
+.main-nav a.active,.main-nav-left a.active{color:var(--brand-2)}
 
 .dark .main-nav a {
   color: var(--text);
@@ -180,6 +185,31 @@ body.dark .main-nav a:hover{background:#111827}
 body.dark .btn-ghost{background:transparent; color:#c7f4ff; border-color:#334155}
 body.dark .section.alt{background:#0a1020}
 body.dark .step-card{background:#0f172a; border-color:#1f2937}
+
+/* KB dropdown */
+.kb-wrapper{position:relative;}
+.kb-avatar{
+  width:36px; height:36px; border-radius:999px;
+  background:#2563eb; color:#fff; border:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:700; cursor:pointer;
+}
+.kb-dropdown{
+  position:absolute; right:0; top:calc(100% + 10px);
+  background:#ffffff; border:1px solid #e5e7eb; border-radius:12px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.14);
+  padding:12px; min-width:220px; z-index:40;
+}
+.kb-dropdown .dropdown-section{display:grid; gap:8px; margin-bottom:10px;}
+.kb-dropdown .dropdown-section:last-child{margin-bottom:0;}
+.kb-dropdown a,
+.kb-dropdown button{
+  display:block; width:100%; text-align:left;
+  padding:9px 10px; border-radius:10px;
+  border:1px solid #e5e7eb; background:#ffffff;
+  text-decoration:none; color:inherit; cursor:pointer;
+}
+.hidden{display:none !important;}
 
 /* ---- Responsive ---- */
 @media (max-width: 980px){
