@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filters | ISweep</title>
+  <link rel="stylesheet" href="styles/site-plan.css" />
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo-box" href="index.html">
+        <img src="images/ISweep.png" alt="ISweep logo" />
+        <strong class="brand">ISweep</strong>
+      </a>
+
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="Filter.html" class="active">Filters</a>
+        <a href="Plans.html">Plans</a>
+        <a href="Help.html">Help</a>
+      </nav>
+
+      <div class="profile-menu" style="position: relative;">
+        <details class="user-menu" style="position: relative;">
+          <summary class="user-trigger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none;">
+            <span class="avatar-chip" data-avatar-chip style="width: 36px; height: 36px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">KB</span>
+          </summary>
+          <div class="user-menu-panel" style="position: absolute; right: 0; top: calc(100% + 10px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.14); padding: 12px; min-width: 240px; z-index: 30;">
+            <div class="theme-row" style="display: grid; gap: 8px; margin-bottom: 10px;">
+              <button type="button" data-theme-toggle style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff;" aria-live="polite">
+                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                  <span data-theme-icon>☀️</span>
+                  <span data-theme-label>Theme: Light</span>
+                </span>
+                <span style="color: #94a3b8; font-size: 0.9rem;">Tap to cycle</span>
+              </button>
+              <div class="theme-options" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;">
+                <button type="button" data-theme-option="light" style="padding: 8px 6px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">Light</button>
+                <button type="button" data-theme-option="dark" style="padding: 8px 6px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">Dark</button>
+                <button type="button" data-theme-option="system" style="padding: 8px 6px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">System</button>
+              </div>
+            </div>
+            <div class="menu-links" style="display: grid; gap: 8px;">
+              <a href="Account.html" style="display: block; padding: 9px 10px; border-radius: 10px; text-decoration: none; color: inherit; border: 1px solid #e5e7eb;">Account</a>
+              <a href="Settings.html" style="display: block; padding: 9px 10px; border-radius: 10px; text-decoration: none; color: inherit; border: 1px solid #e5e7eb;">Preferences</a>
+              <button type="button" data-logout style="display: block; width: 100%; text-align: left; padding: 9px 10px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff;">Sign Out</button>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <main class="filters-page container" data-filters-page>
+    <section class="filters-hero card">
+      <div>
+        <p class="eyebrow">Control center</p>
+        <h1>Filters</h1>
+        <p class="subtitle">Select which types of content you want ISweep to filter and control your media experience.</p>
+      </div>
+      <div style="display: grid; gap: 6px; text-align: right; color: var(--muted);">
+        <span style="font-weight: 700; color: var(--brand-2);">Live policy ready</span>
+        <span>Plans remain public; Preferences live in the KB menu.</span>
+      </div>
+    </section>
+
+    <section class="filter-tiles" aria-label="Filter categories">
+      <button class="filter-tile tile-selected" type="button" data-filter-tile="language">
+        <div class="tile-top">
+          <span class="tile-icon">💬</span>
+          <span class="enabled-dot enabled-on"></span>
+        </div>
+        <p class="tile-label">Language</p>
+        <p class="subtitle" style="margin:0;">Mute strong words and slurs.</p>
+      </button>
+      <button class="filter-tile" type="button" data-filter-tile="intimacy">
+        <div class="tile-top">
+          <span class="tile-icon">❤️</span>
+          <span class="enabled-dot enabled-on"></span>
+        </div>
+        <p class="tile-label">Intimacy</p>
+        <p class="subtitle" style="margin:0;">Skip intimacy and nudity moments.</p>
+      </button>
+      <button class="filter-tile" type="button" data-filter-tile="violence">
+        <div class="tile-top">
+          <span class="tile-icon">⚔️</span>
+          <span class="enabled-dot enabled-on"></span>
+        </div>
+        <p class="tile-label">Violence</p>
+        <p class="subtitle" style="margin:0;">Remove gore and heavy combat.</p>
+      </button>
+      <button class="filter-tile" type="button" data-filter-tile="substances">
+        <div class="tile-top">
+          <span class="tile-icon">🍷</span>
+          <span class="enabled-dot enabled-on"></span>
+        </div>
+        <p class="tile-label">Substances</p>
+        <p class="subtitle" style="margin:0;">Tone down alcohol, drugs, smoking.</p>
+      </button>
+      <button class="filter-tile" type="button" data-filter-tile="horror">
+        <div class="tile-top">
+          <span class="tile-icon">👻</span>
+          <span class="enabled-dot enabled-on"></span>
+        </div>
+        <p class="tile-label">Horror & Fears</p>
+        <p class="subtitle" style="margin:0;">Soften jump scares and dark themes.</p>
+      </button>
+    </section>
+
+    <section class="filters-grid">
+      <section class="category-card">
+        <div class="category-header">
+          <div>
+            <p class="eyebrow" style="margin-bottom:4px;">Category Details</p>
+            <h2 data-category-name>💬 Language</h2>
+          </div>
+          <label class="toggle-row" aria-label="Toggle category">
+            <input type="checkbox" data-category-toggle checked />
+            <span class="enabled-dot enabled-on"></span>
+            <span>Enabled</span>
+          </label>
+        </div>
+
+        <div class="subcategory-list" data-subcategory-list></div>
+
+        <div class="custom-words">
+          <div class="input-row">
+            <input id="customWordInput" type="text" placeholder="Add a custom word or phrase" aria-label="Custom word" />
+            <button id="customWordAdd" type="button">Add</button>
+          </div>
+          <div id="customWordList"></div>
+        </div>
+
+        <div class="sensitivity">
+          <strong>Sensitivity</strong>
+          <div class="range-row">
+            <span>Low</span>
+            <input id="sensitivityRange" type="range" min="1" max="5" step="1" value="3" />
+            <span>High</span>
+            <span id="sensitivityValue" aria-live="polite">3</span>
+          </div>
+        </div>
+
+        <div class="action-grid" style="margin-top: 12px;">
+          <label>
+            <strong>Action</strong>
+            <select id="actionSelect">
+              <option value="mute">Mute audio only</option>
+              <option value="skip">Skip scene</option>
+              <option value="fast-forward">Fast-forward</option>
+              <option value="log-only">Log only</option>
+            </select>
+          </label>
+          <label>
+            <strong>Duration (seconds)</strong>
+            <input id="actionDuration" type="number" min="0" step="1" value="6" />
+          </label>
+        </div>
+
+        <div class="filters-actions">
+          <button type="button" id="resetCategory">Reset</button>
+          <button type="button" class="primary" id="saveFilters">Save</button>
+        </div>
+      </section>
+
+      <aside class="filters-aside">
+        <div class="card" style="padding: 16px;">
+          <p class="eyebrow">Activity</p>
+          <h3 style="margin: 6px 0 4px;">Last 7 Days</h3>
+          <div class="activity-meta">
+            <span>27 words muted</span>
+            <span>4 scenes skipped</span>
+            <span>1 scene fast-forwarded</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 16px;">
+          <p class="eyebrow">Suggested Presets</p>
+          <div class="preset-buttons">
+            <button type="button">Teen Mode</button>
+            <button type="button">Family Safe</button>
+            <button type="button">All presets</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

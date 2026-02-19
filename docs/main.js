@@ -8,6 +8,63 @@ const tokenStorageKey = 'isweep-token'; // Stores auth token from backend.
 const userIdStorageKey = 'isweep-user-id'; // Stores user id returned by backend.
 const preferencesCacheKey = 'isweep-preferences'; // Caches preferences for offline fallback.
 const BACKEND_DEFAULT = 'http://127.0.0.1:5000';
+const FILTER_CATEGORY_CONFIG = {
+  language: {
+    label: 'Language',
+    icon: '💬',
+    subcategories: [
+      { key: 'profanity', label: 'Profanity', count: '14/14' },
+      { key: 'blasphemy', label: 'Blasphemy', count: '6/6' },
+      { key: 'childish', label: 'Childish', count: '4/4' },
+      { key: 'slurs', label: 'Slurs', count: '10/10' },
+    ],
+    defaults: { action: 'mute', duration: 6, sensitivity: 3 },
+  },
+  intimacy: {
+    label: 'Intimacy',
+    icon: '❤️',
+    subcategories: [
+      { key: 'kissing', label: 'Kissing', count: '5/5' },
+      { key: 'nudity', label: 'Nudity', count: '8/8' },
+      { key: 'suggestive', label: 'Suggestive', count: '7/7' },
+      { key: 'assault', label: 'Assault', count: '3/3' },
+    ],
+    defaults: { action: 'skip', duration: 15, sensitivity: 3 },
+  },
+  violence: {
+    label: 'Violence',
+    icon: '⚔️',
+    subcategories: [
+      { key: 'combat', label: 'Combat', count: '9/9' },
+      { key: 'weapons', label: 'Weapons', count: '6/6' },
+      { key: 'blood', label: 'Blood', count: '5/5' },
+      { key: 'gore', label: 'Gore', count: '4/4' },
+    ],
+    defaults: { action: 'skip', duration: 12, sensitivity: 3 },
+  },
+  substances: {
+    label: 'Substances',
+    icon: '🍷',
+    subcategories: [
+      { key: 'alcohol', label: 'Alcohol', count: '6/6' },
+      { key: 'drugs', label: 'Drugs', count: '5/5' },
+      { key: 'smoking', label: 'Smoking', count: '4/4' },
+      { key: 'gambling', label: 'Gambling', count: '3/3' },
+    ],
+    defaults: { action: 'log-only', duration: 6, sensitivity: 2 },
+  },
+  horror: {
+    label: 'Horror & Fears',
+    icon: '👻',
+    subcategories: [
+      { key: 'jump_scares', label: 'Jump scares', count: '6/6' },
+      { key: 'creatures', label: 'Creatures', count: '4/4' },
+      { key: 'supernatural', label: 'Supernatural', count: '5/5' },
+      { key: 'suspense', label: 'Suspense', count: '4/4' },
+    ],
+    defaults: { action: 'fast-forward', duration: 10, sensitivity: 2 },
+  },
+};
 // Migration: copy older camelCase keys into the new kebab-case keys so existing users stay signed in.
 if (!localStorage.getItem(tokenStorageKey) && localStorage.getItem('isweepToken')) {
   localStorage.setItem(tokenStorageKey, localStorage.getItem('isweepToken'));
@@ -393,6 +450,49 @@ function saveSettingsToStorage(settings) {
   }
 }
 
+function getDefaultFilterState() {
+  const base = { filters_enabled: {}, subfilters_enabled: {}, actions: {}, custom_words: {} };
+  Object.entries(FILTER_CATEGORY_CONFIG).forEach(([key, config]) => {
+    base.filters_enabled[key] = true;
+    base.subfilters_enabled[key] = {};
+    config.subcategories.forEach((sub) => {
+      base.subfilters_enabled[key][sub.key] = true;
+    });
+    base.actions[key] = {
+      action: config.defaults.action,
+      duration: config.defaults.duration,
+      sensitivity: config.defaults.sensitivity,
+    };
+    base.custom_words[key] = key === 'language' ? [] : [];
+  });
+  return base;
+}
+
+function ensureFilterSettings(settings) {
+  const defaults = getDefaultFilterState();
+  const merged = { ...settings };
+  merged.filters_enabled = { ...defaults.filters_enabled, ...(settings.filters_enabled || {}) };
+  merged.subfilters_enabled = { ...defaults.subfilters_enabled, ...(settings.subfilters_enabled || {}) };
+  merged.actions = { ...defaults.actions, ...(settings.actions || {}) };
+  merged.custom_words = { ...defaults.custom_words, ...(settings.custom_words || {}) };
+
+  Object.keys(FILTER_CATEGORY_CONFIG).forEach((key) => {
+    merged.subfilters_enabled[key] = {
+      ...defaults.subfilters_enabled[key],
+      ...(merged.subfilters_enabled[key] || {}),
+    };
+    merged.actions[key] = {
+      ...defaults.actions[key],
+      ...(merged.actions[key] || {}),
+    };
+    merged.custom_words[key] = Array.isArray(merged.custom_words[key])
+      ? merged.custom_words[key]
+      : [];
+  });
+
+  return merged;
+}
+
 const ACTION_DEFAULT_DURATIONS = {
   mute: 4,
   skip: 12,
@@ -736,6 +836,237 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     });
   }
+});
+
+//-----------------------------------------------------
+//  FILTERS PAGE: CONTROL CENTER
+//-----------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const filtersPage = document.querySelector('[data-filters-page]');
+  if (!filtersPage) return;
+
+  let settings = ensureFilterSettings(loadSettingsFromStorage());
+  let currentCategory = 'language';
+
+  const tileButtons = filtersPage.querySelectorAll('[data-filter-tile]');
+  const categoryName = filtersPage.querySelector('[data-category-name]');
+  const categoryToggle = filtersPage.querySelector('[data-category-toggle]');
+  const subcategoryList = filtersPage.querySelector('[data-subcategory-list]');
+  const customWordInput = document.getElementById('customWordInput');
+  const customWordAdd = document.getElementById('customWordAdd');
+  const customWordList = document.getElementById('customWordList');
+  const actionSelect = document.getElementById('actionSelect');
+  const durationInput = document.getElementById('actionDuration');
+  const sensitivityRange = document.getElementById('sensitivityRange');
+  const sensitivityValue = document.getElementById('sensitivityValue');
+  const saveButton = document.getElementById('saveFilters');
+  const resetButton = document.getElementById('resetCategory');
+
+  function setCurrentCategory(next) {
+    currentCategory = next;
+    renderTiles();
+    renderCategoryDetail();
+  }
+
+  function renderTiles() {
+    tileButtons.forEach((button) => {
+      const key = button.getAttribute('data-filter-tile');
+      const isSelected = key === currentCategory;
+      const isEnabled = !!settings.filters_enabled[key];
+      button.classList.toggle('tile-selected', isSelected);
+      const indicator = button.querySelector('.enabled-dot');
+      if (indicator) {
+        indicator.classList.toggle('enabled-on', isEnabled);
+      }
+    });
+  }
+
+  function renderSubcategories() {
+    if (!subcategoryList) return;
+    subcategoryList.innerHTML = '';
+    const config = FILTER_CATEGORY_CONFIG[currentCategory];
+    config.subcategories.forEach((sub) => {
+      const row = document.createElement('div');
+      row.className = 'sub-row';
+
+      const left = document.createElement('label');
+      left.className = 'sub-row-left';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !!settings.subfilters_enabled[currentCategory][sub.key];
+      checkbox.setAttribute('data-subfilter', sub.key);
+
+      const dot = document.createElement('span');
+      dot.className = 'enabled-dot';
+      dot.classList.toggle('enabled-on', checkbox.checked);
+
+      const name = document.createElement('span');
+      name.textContent = sub.label;
+
+      left.appendChild(checkbox);
+      left.appendChild(dot);
+      left.appendChild(name);
+
+      const right = document.createElement('div');
+      right.className = 'sub-row-right';
+      const badge = document.createElement('span');
+      badge.className = 'count-badge';
+      badge.textContent = sub.count;
+      const chevron = document.createElement('span');
+      chevron.className = 'chevron';
+      chevron.textContent = '›';
+      right.appendChild(badge);
+      right.appendChild(chevron);
+
+      row.appendChild(left);
+      row.appendChild(right);
+
+      row.addEventListener('change', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLInputElement) {
+          const key = target.getAttribute('data-subfilter');
+          settings.subfilters_enabled[currentCategory][key] = target.checked;
+          dot.classList.toggle('enabled-on', target.checked);
+          renderTiles();
+        }
+      });
+
+      subcategoryList.appendChild(row);
+    });
+  }
+
+  function renderCustomWords() {
+    if (!customWordList) return;
+    customWordList.innerHTML = '';
+    const words = settings.custom_words[currentCategory] || [];
+    if (!words.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-hint';
+      empty.textContent = 'No custom words yet.';
+      customWordList.appendChild(empty);
+      return;
+    }
+
+    words.forEach((word) => {
+      const chip = document.createElement('span');
+      chip.className = 'word-chip';
+      chip.textContent = word;
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'chip-remove';
+      remove.textContent = '×';
+      remove.addEventListener('click', () => {
+        settings.custom_words[currentCategory] = words.filter((w) => w !== word);
+        renderCustomWords();
+      });
+
+      chip.appendChild(remove);
+      customWordList.appendChild(chip);
+    });
+  }
+
+  function renderCategoryDetail() {
+    const config = FILTER_CATEGORY_CONFIG[currentCategory];
+    if (categoryName) categoryName.textContent = `${config.icon} ${config.label}`;
+    if (categoryToggle) categoryToggle.checked = !!settings.filters_enabled[currentCategory];
+
+    renderSubcategories();
+    renderCustomWords();
+
+    if (actionSelect) actionSelect.value = settings.actions[currentCategory].action;
+    if (durationInput) durationInput.value = settings.actions[currentCategory].duration;
+    if (sensitivityRange) {
+      sensitivityRange.value = settings.actions[currentCategory].sensitivity;
+      if (sensitivityValue) sensitivityValue.textContent = settings.actions[currentCategory].sensitivity;
+    }
+  }
+
+  function addCustomWord() {
+    if (!customWordInput) return;
+    const value = customWordInput.value.trim();
+    if (!value) return;
+
+    const words = settings.custom_words[currentCategory] || [];
+    if (!words.includes(value)) {
+      settings.custom_words[currentCategory] = [...words, value];
+      renderCustomWords();
+      customWordInput.value = '';
+      saveSettingsToStorage(settings);
+    }
+  }
+
+  tileButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = button.getAttribute('data-filter-tile');
+      if (key) setCurrentCategory(key);
+    });
+  });
+
+  if (categoryToggle) {
+    categoryToggle.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      settings.filters_enabled[currentCategory] = target.checked;
+      renderTiles();
+    });
+  }
+
+  if (actionSelect) {
+    actionSelect.addEventListener('change', () => {
+      settings.actions[currentCategory].action = actionSelect.value;
+    });
+  }
+
+  if (durationInput) {
+    durationInput.addEventListener('change', () => {
+      const next = Number(durationInput.value) || 0;
+      settings.actions[currentCategory].duration = Math.max(0, next);
+    });
+  }
+
+  if (sensitivityRange) {
+    sensitivityRange.addEventListener('input', () => {
+      const next = Number(sensitivityRange.value) || 1;
+      settings.actions[currentCategory].sensitivity = next;
+      if (sensitivityValue) sensitivityValue.textContent = next;
+    });
+  }
+
+  if (customWordAdd && customWordInput) {
+    customWordAdd.addEventListener('click', addCustomWord);
+    customWordInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addCustomWord();
+      }
+    });
+  }
+
+  if (resetButton) {
+    resetButton.addEventListener('click', () => {
+      const defaults = getDefaultFilterState();
+      settings.filters_enabled[currentCategory] = defaults.filters_enabled[currentCategory];
+      settings.subfilters_enabled[currentCategory] = {
+        ...defaults.subfilters_enabled[currentCategory],
+      };
+      settings.actions[currentCategory] = { ...defaults.actions[currentCategory] };
+      settings.custom_words[currentCategory] = [...(defaults.custom_words[currentCategory] || [])];
+      renderCategoryDetail();
+      renderTiles();
+    });
+  }
+
+  if (saveButton) {
+    saveButton.addEventListener('click', () => {
+      saveSettingsToStorage(settings);
+      alert('Filters saved locally.');
+    });
+  }
+
+  renderTiles();
+  renderCategoryDetail();
 });
 
 //-----------------------------------------------------
