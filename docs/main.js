@@ -855,6 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const subcategoryList = filtersPage.querySelector('[data-subcategory-list]');
   const customWordInput = document.getElementById('customWordInput');
   const customWordAdd = document.getElementById('customWordAdd');
+  const customWordAddInline = document.getElementById('customWordAddInline');
   const customWordList = document.getElementById('customWordList');
   const actionSelect = document.getElementById('actionSelect');
   const durationInput = document.getElementById('actionDuration');
@@ -1036,8 +1037,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (customWordAdd && customWordInput) {
-    customWordAdd.addEventListener('click', addCustomWord);
+  if (customWordInput) {
+    const wireAdd = (button) => {
+      if (button) button.addEventListener('click', addCustomWord);
+    };
+    wireAdd(customWordAdd);
+    wireAdd(customWordAddInline);
     customWordInput.addEventListener('keypress', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
