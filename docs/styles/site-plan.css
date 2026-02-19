@@ -287,21 +287,22 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .filter-tile {
+  position: relative;
   display: grid;
   gap: 6px;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+  padding: 18px 16px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #f8fafc;
+  box-shadow: 0 16px 36px rgba(16,37,43,0.22);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease, filter 0.15s ease;
 }
 
 .filter-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 22px rgba(0,0,0,0.08);
+  box-shadow: 0 18px 30px rgba(16,37,43,0.26);
 }
 
 .filter-tile .tile-top {
@@ -311,18 +312,30 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .filter-tile .tile-icon {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
 }
 
 .filter-tile .tile-label {
   font-weight: 700;
-  color: var(--brand-2);
+  color: #fff;
   margin: 0;
 }
 
 .tile-selected {
-  border-color: var(--brand-2);
-  box-shadow: 0 14px 28px rgba(16,37,43,0.14);
+  border-color: rgba(255,255,255,0.8);
+  box-shadow: 0 20px 40px rgba(16,37,43,0.32);
+  filter: saturate(1.05);
+}
+
+.tile-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.22);
 }
 
 .enabled-dot {
@@ -366,9 +379,45 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .toggle-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+}
+
+.switch {
+  appearance: none;
+  width: 42px;
+  height: 22px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(15,23,42,0.15);
+  transition: transform 0.2s ease;
+}
+
+.switch:checked {
+  background: #22c55e;
+}
+
+.switch:checked::after {
+  transform: translateX(20px);
 }
 
 .subcategory-list {
@@ -384,7 +433,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.85);
 }
 
 .dark .sub-row {
@@ -444,7 +493,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: #eef2f7;
+  background: #e2e8f0;
   border-radius: 999px;
   margin: 4px 6px 0 0;
   color: #0f172a;
@@ -497,6 +546,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 
 .sensitivity input[type="range"] {
   flex: 1;
+  accent-color: #2563eb;
 }
 
 .filters-actions {
@@ -515,9 +565,12 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .filters-actions .primary {
-  background: var(--brand-2);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
-  border-color: var(--brand-2);
+  border-color: #1d4ed8;
+}
+.filters-actions .ghost {
+  background: #e5e7eb;
 }
 
 .filters-aside {
@@ -543,6 +596,57 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   border: 1px solid var(--border);
   background: #fff;
   cursor: pointer;
+}
+
+.pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #eef2f7;
+  font-size: 0.9rem;
+}
+
+.pill.muted {
+  color: var(--muted);
+}
+
+.pill-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.link-btn .plus {
+  font-weight: 900;
+}
+
+.duration-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.duration-row .suffix {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
 }
 
 .dark .preset-buttons button {

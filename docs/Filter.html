@@ -68,45 +68,40 @@
     </section>
 
     <section class="filter-tiles" aria-label="Filter categories">
-      <button class="filter-tile tile-selected" type="button" data-filter-tile="language">
+      <button class="filter-tile tile-selected" type="button" data-filter-tile="language" style="background: linear-gradient(145deg, #a5d4ff 0%, #3c74ff 100%);">
+        <span class="tile-check"></span>
         <div class="tile-top">
           <span class="tile-icon">💬</span>
-          <span class="enabled-dot enabled-on"></span>
         </div>
         <p class="tile-label">Language</p>
-        <p class="subtitle" style="margin:0;">Mute strong words and slurs.</p>
       </button>
-      <button class="filter-tile" type="button" data-filter-tile="intimacy">
+      <button class="filter-tile" type="button" data-filter-tile="intimacy" style="background: linear-gradient(145deg, #7ec8ff 0%, #2f6ad9 100%);">
+        <span class="tile-check"></span>
         <div class="tile-top">
           <span class="tile-icon">❤️</span>
-          <span class="enabled-dot enabled-on"></span>
         </div>
         <p class="tile-label">Intimacy</p>
-        <p class="subtitle" style="margin:0;">Skip intimacy and nudity moments.</p>
       </button>
-      <button class="filter-tile" type="button" data-filter-tile="violence">
+      <button class="filter-tile" type="button" data-filter-tile="violence" style="background: linear-gradient(145deg, #78b7ff 0%, #1f4ea6 100%);">
+        <span class="tile-check"></span>
         <div class="tile-top">
           <span class="tile-icon">⚔️</span>
-          <span class="enabled-dot enabled-on"></span>
         </div>
         <p class="tile-label">Violence</p>
-        <p class="subtitle" style="margin:0;">Remove gore and heavy combat.</p>
       </button>
-      <button class="filter-tile" type="button" data-filter-tile="substances">
+      <button class="filter-tile" type="button" data-filter-tile="substances" style="background: linear-gradient(145deg, #6db0ff 0%, #1b4c94 100%);">
+        <span class="tile-check"></span>
         <div class="tile-top">
           <span class="tile-icon">🍷</span>
-          <span class="enabled-dot enabled-on"></span>
         </div>
         <p class="tile-label">Substances</p>
-        <p class="subtitle" style="margin:0;">Tone down alcohol, drugs, smoking.</p>
       </button>
-      <button class="filter-tile" type="button" data-filter-tile="horror">
+      <button class="filter-tile" type="button" data-filter-tile="horror" style="background: linear-gradient(145deg, #5ba3ff 0%, #163f7b 100%);">
+        <span class="tile-check"></span>
         <div class="tile-top">
-          <span class="tile-icon">👻</span>
-          <span class="enabled-dot enabled-on"></span>
+          <span class="tile-icon">👁️</span>
         </div>
-        <p class="tile-label">Horror & Fears</p>
-        <p class="subtitle" style="margin:0;">Soften jump scares and dark themes.</p>
+        <p class="tile-label">Horror &amp; Fears</p>
       </button>
     </section>
 
@@ -118,18 +113,21 @@
             <h2 data-category-name>💬 Language</h2>
           </div>
           <label class="toggle-row" aria-label="Toggle category">
-            <input type="checkbox" data-category-toggle checked />
-            <span class="enabled-dot enabled-on"></span>
-            <span>Enabled</span>
+            <span class="toggle-label">On</span>
+            <input type="checkbox" data-category-toggle class="switch" checked />
           </label>
         </div>
 
         <div class="subcategory-list" data-subcategory-list></div>
 
+        <button type="button" class="link-btn" id="customWordAdd" aria-label="Manage custom words" style="margin: 8px 0 6px;">
+          <span class="plus">＋</span>
+          Manage Custom Words
+        </button>
         <div class="custom-words">
           <div class="input-row">
             <input id="customWordInput" type="text" placeholder="Add a custom word or phrase" aria-label="Custom word" />
-            <button id="customWordAdd" type="button">Add</button>
+            <button type="button" class="pill-btn" id="customWordAddInline">Add</button>
           </div>
           <div id="customWordList"></div>
         </div>
@@ -137,10 +135,10 @@
         <div class="sensitivity">
           <strong>Sensitivity</strong>
           <div class="range-row">
-            <span>Low</span>
+            <span class="muted">Low</span>
             <input id="sensitivityRange" type="range" min="1" max="5" step="1" value="3" />
-            <span>High</span>
-            <span id="sensitivityValue" aria-live="polite">3</span>
+            <span class="muted">High</span>
+            <span id="sensitivityValue" class="pill">3</span>
           </div>
         </div>
 
@@ -155,25 +153,32 @@
             </select>
           </label>
           <label>
-            <strong>Duration (seconds)</strong>
-            <input id="actionDuration" type="number" min="0" step="1" value="6" />
+            <strong>Duration</strong>
+            <div class="duration-row">
+              <input id="actionDuration" type="number" min="0" step="1" value="6" />
+              <span class="suffix">secs</span>
+            </div>
           </label>
         </div>
 
         <div class="filters-actions">
-          <button type="button" id="resetCategory">Reset</button>
+          <button type="button" class="ghost" id="resetCategory">Reset</button>
+          <button type="button" class="ghost" id="cancelFilters">Cancel</button>
           <button type="button" class="primary" id="saveFilters">Save</button>
         </div>
       </section>
 
       <aside class="filters-aside">
         <div class="card" style="padding: 16px;">
-          <p class="eyebrow">Activity</p>
+          <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px;">
+            <p class="eyebrow" style="margin:0;">Activity</p>
+            <span class="pill muted">9 Active Filters</span>
+          </div>
           <h3 style="margin: 6px 0 4px;">Last 7 Days</h3>
           <div class="activity-meta">
             <span>27 words muted</span>
             <span>4 scenes skipped</span>
-            <span>1 scene fast-forwarded</span>
+            <span>1 scary scene fast-forwarded</span>
           </div>
         </div>
 
@@ -182,7 +187,7 @@
           <div class="preset-buttons">
             <button type="button">Teen Mode</button>
             <button type="button">Family Safe</button>
-            <button type="button">All presets</button>
+            <button type="button" class="ghost">All Presets</button>
           </div>
         </div>
       </aside>
