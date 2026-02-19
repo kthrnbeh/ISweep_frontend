@@ -451,7 +451,7 @@ function saveSettingsToStorage(settings) {
 }
 
 function getDefaultFilterState() {
-  const base = { filters_enabled: {}, subfilters_enabled: {}, actions: {}, custom_words: {} };
+  const base = { filters_enabled: {}, subfilters_enabled: {}, actions: {}, custom_words: { language: [] } };
   Object.entries(FILTER_CATEGORY_CONFIG).forEach(([key, config]) => {
     base.filters_enabled[key] = true;
     base.subfilters_enabled[key] = {};
@@ -463,7 +463,6 @@ function getDefaultFilterState() {
       duration: config.defaults.duration,
       sensitivity: config.defaults.sensitivity,
     };
-    base.custom_words[key] = key === 'language' ? [] : [];
   });
   return base;
 }
@@ -485,9 +484,11 @@ function ensureFilterSettings(settings) {
       ...defaults.actions[key],
       ...(merged.actions[key] || {}),
     };
-    merged.custom_words[key] = Array.isArray(merged.custom_words[key])
+    merged.custom_words[key] = key === 'language' && Array.isArray(merged.custom_words[key])
       ? merged.custom_words[key]
-      : [];
+      : key === 'language'
+        ? []
+        : undefined;
   });
 
   return merged;
@@ -861,6 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sensitivityValue = document.getElementById('sensitivityValue');
   const saveButton = document.getElementById('saveFilters');
   const resetButton = document.getElementById('resetCategory');
+  const cancelButton = document.getElementById('cancelFilters');
 
   function setCurrentCategory(next) {
     currentCategory = next;
@@ -1055,6 +1057,14 @@ document.addEventListener('DOMContentLoaded', () => {
       settings.custom_words[currentCategory] = [...(defaults.custom_words[currentCategory] || [])];
       renderCategoryDetail();
       renderTiles();
+    });
+  }
+
+  if (cancelButton) {
+    cancelButton.addEventListener('click', () => {
+      settings = ensureFilterSettings(loadSettingsFromStorage());
+      renderTiles();
+      renderCategoryDetail();
     });
   }
 
