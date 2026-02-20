@@ -142,7 +142,7 @@ body{
 
 /* Hero visual */
 .hero-visual img{
-  width:100%; height:auto; border-radius:var(--radius);
+    background: #30C3D9;
   box-shadow: var(--shadow);
   background:#fff; object-fit:cover;
 }
@@ -154,7 +154,7 @@ body{
 }
 .icon-strip img{
   width:64px; height:64px; object-fit:contain; display:block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.04));
+    background: #30C3D9;
 }
 
 /* ---- Steps (cards) ---- */
@@ -211,7 +211,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   display:block; width:100%; text-align:left;
   padding:9px 10px; border-radius:10px;
   border:1px solid #e5e7eb; background:#ffffff;
-  text-decoration:none; color:inherit; cursor:pointer;
+    background: #30C3D9;
 }
 .hidden{display:none !important;}
 
@@ -322,8 +322,8 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 
 .filter-tile {
   position: relative;
-  display: grid;
-  gap: 6px;
+    flex: 1;
+    accent-color: #30C3D9;
   padding: 18px 16px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.4);
@@ -339,7 +339,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   box-shadow: 0 18px 30px rgba(16,37,43,0.26);
 }
 
-.filter-tile .tile-top {
+    background: linear-gradient(135deg, #30C3D9, #22A9C2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -390,7 +390,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   grid-template-columns: 1.2fr 0.8fr;
   gap: 18px;
   align-items: start;
-}
+    color: #30C3D9;
 
 .category-card,
 .filters-aside .card {
