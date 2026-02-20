@@ -190,7 +190,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 .kb-wrapper{position:relative;}
 .kb-avatar{
   width:36px; height:36px; border-radius:999px;
-  background:#2563eb; color:#fff; border:none;
+  background:#14B8A6; color:#fff; border:none;
   display:inline-flex; align-items:center; justify-content:center;
   font-weight:700; cursor:pointer;
 }
@@ -364,7 +364,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #22c55e;
+  background: #14B8A6;
   box-shadow: 0 0 0 4px rgba(255,255,255,0.22);
 }
 
@@ -378,7 +378,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .enabled-dot.enabled-on {
-  background: #22c55e;
+  background: #14B8A6;
 }
 
 .filters-grid {
@@ -443,7 +443,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .switch:checked {
-  background: #22c55e;
+  background: #14B8A6;
 }
 
 .switch:checked::after {
@@ -807,12 +807,12 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 
 /* Dark mode button colors (keep them readable on dark bg) */
 .dark .account-page .card button {
-  background-color: #22c55e;      /* bright green button in dark mode */
-  color: #022c22;
+  background-color: #14B8A6;      /* teal button in dark mode */
+  color: #042f2e;
 }
 
 .dark .account-page .card button:hover {
-  background-color: #16a34a;
+  background-color: #0D9488;
 }
 
 /* ---------- MOBILE RESPONSIVE ADJUSTMENTS ---------- */
