@@ -47,6 +47,7 @@
   </header>
 
   <main class="filters-page container" data-filters-page>
+    <!-- Page hero summarizing filter purpose without altering layout -->
     <section class="filters-hero card">
       <div>
         <p class="eyebrow">Control center</p>
@@ -59,6 +60,7 @@
       </div>
     </section>
 
+    <!-- Category tiles list; selection highlights active category -->
     <section class="filter-tiles" aria-label="Filter categories">
       <button class="filter-tile tile-selected" type="button" data-filter-tile="language" style="background: linear-gradient(145deg, #a5d4ff 0%, #3c74ff 100%);">
         <span class="tile-check"></span>
@@ -98,6 +100,7 @@
     </section>
 
     <section class="filters-grid">
+      <!-- Primary category detail panel; toggles and actions live here -->
       <section class="category-card">
         <div class="category-header">
           <div>
@@ -160,6 +163,7 @@
         </div>
       </section>
 
+      <!-- Sidebar with activity and presets remains unchanged for quick stats -->
       <aside class="filters-aside">
         <div class="card" style="padding: 16px;">
           <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px;">
