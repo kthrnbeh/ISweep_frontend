@@ -513,6 +513,84 @@ function ensureFilterSettings(settings) {
   return merged;
 }
 
+function mapFilterSensitivityToPreference(value) {
+  const numeric = Number(value) || 0;
+  if (numeric <= 1) return 0.2;
+  if (numeric >= 3) return 0.9;
+  return 0.7;
+}
+
+function mapPreferenceSensitivityToFilter(value) {
+  if (typeof value !== 'number') return 2;
+  if (value < 0.34) return 1;
+  if (value < 0.67) return 2;
+  return 3;
+}
+
+function filterSettingsToPreferences(filterSettings) {
+  const safe = ensureFilterSettings(filterSettings || {});
+  const categories = {};
+
+  Object.keys(FILTER_CATEGORY_CONFIG).forEach((key) => {
+    const actionSelectValue = safe.actions[key]?.action || FILTER_CATEGORY_CONFIG[key].defaults.action;
+    const action = mapSelectToAction(actionSelectValue, 'mute');
+    const duration = Number(safe.actions[key]?.duration) || ACTION_DEFAULT_DURATIONS[action] || 4;
+    const sensitivity = mapFilterSensitivityToPreference(safe.actions[key]?.sensitivity);
+    categories[key] = {
+      enabled: !!safe.filters_enabled[key],
+      action,
+      duration,
+      sensitivity,
+    };
+  });
+
+  const blocklistItems = Array.isArray(safe.custom_words.language)
+    ? safe.custom_words.language.map((w) => (typeof w === 'string' ? w.trim() : '')).filter(Boolean)
+    : [];
+
+  const languageDuration = Number(safe.actions.language?.duration) || 4;
+
+  return {
+    enabled: true,
+    categories,
+    sensitivity: 0.7,
+    blocklist: {
+      enabled: true,
+      mode: 'whole_word',
+      action: 'mute',
+      duration: languageDuration || 4,
+      items: blocklistItems,
+    },
+  };
+}
+
+function preferencesToFilterSettings(prefs, existingFilterSettings = {}) {
+  const next = ensureFilterSettings(existingFilterSettings);
+  const categories = (prefs && prefs.categories) || {};
+
+  Object.entries(categories).forEach(([key, cfg]) => {
+    if (!FILTER_CATEGORY_CONFIG[key]) return;
+    next.filters_enabled[key] = cfg?.enabled ?? next.filters_enabled[key];
+    const mappedAction = mapActionToSelect(cfg?.action || next.actions[key].action);
+    next.actions[key] = {
+      ...next.actions[key],
+      action: mappedAction,
+      duration: cfg?.duration ?? next.actions[key].duration,
+      sensitivity: mapPreferenceSensitivityToFilter(cfg?.sensitivity ?? prefs?.sensitivity),
+    };
+  });
+
+  const blocklistItems = Array.isArray(prefs?.blocklist?.items)
+    ? prefs.blocklist.items.map((w) => (typeof w === 'string' ? w.trim() : '')).filter(Boolean)
+    : [];
+
+  if (blocklistItems.length) {
+    next.custom_words.language = blocklistItems;
+  }
+
+  return ensureFilterSettings(next);
+}
+
 const ACTION_DEFAULT_DURATIONS = {
   mute: 4,
   skip: 12,
@@ -861,11 +939,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 //-----------------------------------------------------
 //  FILTERS PAGE: CONTROL CENTER
 //-----------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const filtersPage = document.querySelector('[data-filters-page]');
   if (!filtersPage) return;
 
   let settings = ensureFilterSettings(loadSettingsFromStorage());
+  const prefs = await fetchPreferencesFromBackend();
+  if (prefs) {
+    settings = preferencesToFilterSettings(prefs, settings);
+    saveSettingsToStorage(settings);
+  }
   let currentCategory = 'language';
 
   const tileButtons = filtersPage.querySelectorAll('[data-filter-tile]');
@@ -1093,8 +1176,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (saveButton) {
-    saveButton.addEventListener('click', () => {
+    saveButton.addEventListener('click', async () => {
       saveSettingsToStorage(settings);
+
+      try {
+        const prefsPayload = filterSettingsToPreferences(settings);
+        await persistPreferences(prefsPayload);
+      } catch (error) {
+        console.warn('[ISWEEP][FE] Failed to persist filters to backend; kept local copy', error);
+      }
+
       alert('Filters saved locally.');
     });
   }
