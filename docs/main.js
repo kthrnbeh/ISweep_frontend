@@ -7,6 +7,7 @@ const backendUrlKey = 'isweep-backend-url'; // Allows overriding the backend URL
 const tokenStorageKey = 'isweep-token'; // Stores auth token from backend.
 const userIdStorageKey = 'isweep-user-id'; // Stores user id returned by backend.
 const preferencesCacheKey = 'isweep-preferences'; // Caches preferences for offline fallback.
+const TOKEN_KEY = 'isweep_auth_token'; // Unified token key shared with extension bridge.
 const BACKEND_DEFAULT = 'http://127.0.0.1:5000';
 const FILTER_CATEGORY_CONFIG = {
   language: {
@@ -193,6 +194,7 @@ async function callAuthEndpoint(path, payload) {
 
 function persistSession({ token, userId, email, name, initials }) {
   localStorage.setItem(tokenStorageKey, token);
+  localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(userIdStorageKey, userId);
   const resolvedName = name || email.split('@')[0] || 'User';
   authState.set({ name: resolvedName, email, token, initials: initials || deriveInitials(resolvedName, email) });
