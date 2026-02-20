@@ -47,7 +47,9 @@
         { "id": "slurs-7", "token": "YmFkbmFtZTc=" },
         { "id": "slurs-8", "token": "YmFkbmFtZTg=" },
         { "id": "slurs-9", "token": "YmFkbmFtZTk=" },
-        { "id": "slurs-10", "token": "YmFkbmFtZTEw" }
+        { "id": "slurs-10", "token": "YmFkbmFtZTEw" },
+        { "id": "slurs-11", "token": "YmFkbmFtZTEx" },
+        { "id": "slurs-12", "token":"bmlnZ2Vy"}
       ]
     }
   }
