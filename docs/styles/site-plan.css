@@ -74,6 +74,10 @@ body{
 .nav-left{display:flex; align-items:center; gap:2rem;}
 .main-nav-left{display:flex; gap:1.5rem;}
 .nav-right{display:flex; align-items:center; gap:1.25rem;}
+
+/* Ensure KB appears before Help (Help on the RIGHT of KB) */
+.nav-right .kb-wrapper { order: 1; }
+.nav-right .help-link  { order: 2; }
 .logo-box{display:flex; align-items:center; gap:10px; text-decoration:none}
 .logo-box img{height:36px; width:auto}
 .logo-box .brand{font-size:20px; color:var(--brand-2)}
