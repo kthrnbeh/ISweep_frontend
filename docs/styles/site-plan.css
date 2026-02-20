@@ -390,6 +390,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   grid-template-columns: 1.2fr 0.8fr;
   gap: 18px;
   align-items: start;
+    color: #30C3D9;
 
 .category-card,
 .filters-aside .card {
@@ -415,10 +416,10 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #E5F7FB;
+  background: #f1f5f9;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid #30C3D9;
+  border: 1px solid #e2e8f0;
 }
 
 .switch {
@@ -446,7 +447,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 }
 
 .switch:checked {
-  background: #30C3D9;
+  background: #14B8A6;
 }
 
 .switch:checked::after {
