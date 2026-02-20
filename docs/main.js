@@ -106,6 +106,21 @@ const authState = { // Lightweight helper to manage auth data in localStorage un
   },
 };
 
+function deriveInitials(name, email) { // Consistent initials helper used across pages.
+  const source = name || email || '';
+  const parts = source.split(/[^A-Za-z0-9]+/).filter(Boolean);
+  if (parts.length === 0) return 'KB';
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function setKbAvatarInitials(state) { // Sync header avatar text with stored auth data.
+  const avatars = document.querySelectorAll('.kb-avatar');
+  if (!avatars.length) return;
+  const initials = state?.initials || deriveInitials(state?.name, state?.email);
+  avatars.forEach((el) => { el.textContent = initials || 'KB'; });
+}
+
 function getBackendUrl() {
   const override = localStorage.getItem(backendUrlKey);
   return override || BACKEND_DEFAULT;
@@ -158,6 +173,8 @@ function syncAuthUI() { // Updates dropdown and modal content based on auth stat
       ? `${state.name || 'Account'}, ${state.email || ''}` // Shows name/email when signed in.
       : 'Not signed in.'; // Shows signed-out message otherwise.
   }
+
+  setKbAvatarInitials(state); // Keep header avatar in sync with auth identity.
 }
 
 async function callAuthEndpoint(path, payload) {
@@ -174,10 +191,12 @@ async function callAuthEndpoint(path, payload) {
   return res.json();
 }
 
-function persistSession({ token, userId, email, name }) {
+function persistSession({ token, userId, email, name, initials }) {
   localStorage.setItem(tokenStorageKey, token);
   localStorage.setItem(userIdStorageKey, userId);
-  authState.set({ name: name || email.split('@')[0] || 'User', email, token });
+  const resolvedName = name || email.split('@')[0] || 'User';
+  authState.set({ name: resolvedName, email, token, initials: initials || deriveInitials(resolvedName, email) });
+  setKbAvatarInitials(authState.get());
 }
 
 function clearSession() {
