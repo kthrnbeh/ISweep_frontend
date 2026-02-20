@@ -121,16 +121,18 @@
 
         <div class="subcategory-list" data-subcategory-list></div>
 
-        <button type="button" class="link-btn" id="customWordAdd" aria-label="Manage custom words" style="margin: 8px 0 6px;">
-          <span class="plus">＋</span>
-          Manage Custom Words
-        </button>
-        <div class="custom-words">
-          <div class="input-row">
-            <input id="customWordInput" type="text" placeholder="Add a custom word or phrase" aria-label="Custom word" />
-            <button type="button" class="pill-btn" id="customWordAddInline">Add</button>
+        <div id="customWordsSection" class="custom-words-section">
+          <button type="button" class="link-btn" id="customWordAdd" aria-label="Manage custom words" style="margin: 8px 0 6px;">
+            <span class="plus">＋</span>
+            Manage Custom Words
+          </button>
+          <div class="custom-words">
+            <div class="input-row">
+              <input id="customWordInput" type="text" placeholder="Add a custom word or phrase" aria-label="Custom word" />
+              <button type="button" class="pill-btn" id="customWordAddInline">Add</button>
+            </div>
+            <div id="customWordList"></div>
           </div>
-          <div id="customWordList"></div>
         </div>
 
         <div class="sensitivity">

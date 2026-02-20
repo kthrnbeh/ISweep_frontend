@@ -521,36 +521,55 @@ function ensureFilterSettings(settings) {
         ? []
         : undefined;
     merged.predefined_words[key] = merged.predefined_words[key] || {};
+    if (key === 'language') {
+      Object.entries(wordLibrary.language || {}).forEach(([subKey, payload]) => {
+        const items = Array.isArray(payload?.items) ? payload.items : [];
+        ensurePredefinedSelection(merged, 'language', subKey, items);
+      });
+    }
   });
 
   return merged;
 }
 
 function maskTokenForDisplay(token) {
-  return (token || '').split(' ').map((part) => {
-    if (!part.length) return '';
-    if (part.length === 1) return '#';
-    return part[0] + '#'.repeat(part.length - 1);
-  }).join(' ');
+  const word = token || '';
+  const len = word.length;
+  if (len === 0) return '';
+  if (len <= 2) return `${word[0]}*`;
+  if (len === 3) return `${word[0]}*${word[2]}`;
+  if (len === 4) return `${word.slice(0, 2)}*${word[3]}`;
+  return `${word.slice(0, 2)}***${word[len - 1]}`;
+}
+
+function maskWordPreservingNonLetters(word) {
+  return word
+    .split(' ')
+    .map((chunk) => maskTokenForDisplay(chunk))
+    .join(' ');
 }
 
 function getSelectedPredefinedWords(settings) {
   const out = [];
-  const lang = settings.predefined_words?.language || {};
-  Object.values(lang).forEach((entry) => {
-    if (entry?.selected?.length) {
-      out.push(...entry.selected);
-    }
+  const langSelections = settings.predefined_words?.language || {};
+  Object.entries(langSelections).forEach(([subKey, entry]) => {
+    const ids = Array.isArray(entry?.selectedIds) ? entry.selectedIds : [];
+    const libraryItems = wordLibrary.language[subKey]?.items || [];
+    ids.forEach((id) => {
+      const found = libraryItems.find((item) => item.id === id);
+      if (found && found.word) out.push(found.word);
+    });
   });
   return out;
 }
 
-function ensurePredefinedSelection(settings, categoryKey, subKey, words) {
+function ensurePredefinedSelection(settings, categoryKey, subKey, items) {
   if (!settings.predefined_words) settings.predefined_words = {};
   if (!settings.predefined_words[categoryKey]) settings.predefined_words[categoryKey] = {};
+  const defaultIds = Array.isArray(items) ? items.map((item) => item.id) : [];
   const existing = settings.predefined_words[categoryKey][subKey];
-  if (!existing || !Array.isArray(existing.selected)) {
-    settings.predefined_words[categoryKey][subKey] = { selected: words ? [...words] : [] };
+  if (!existing || !Array.isArray(existing.selectedIds)) {
+    settings.predefined_words[categoryKey][subKey] = { selectedIds: [...defaultIds] };
   }
   return settings.predefined_words[categoryKey][subKey];
 }
@@ -634,41 +653,47 @@ function preferencesToFilterSettings(prefs, existingFilterSettings = {}) {
     : [];
 
   const languageLists = wordLibrary.language || {};
-  const remaining = [];
-
-  if (blocklistItems.length) {
-    const matchedSubfilters = {};
-    blocklistItems.forEach((word) => {
-      let matched = false;
-      Object.entries(languageLists).forEach(([subKey, payload]) => {
-        const words = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
-        if (words.includes(word)) {
-          matched = true;
-          const entry = { selected: [] };
-          entry.selected.push(word);
-          matchedSubfilters[subKey] = matchedSubfilters[subKey]
-            ? { selected: [...new Set([...matchedSubfilters[subKey].selected, word])] }
-            : entry;
-        }
-      });
-      if (!matched) remaining.push(word);
-    });
-
-    Object.entries(languageLists).forEach(([subKey, payload]) => {
-      const words = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
-      const selected = matchedSubfilters[subKey]?.selected || [];
-      next.predefined_words.language[subKey] = { selected };
-      // Remove unmatched defaults so we only keep what the user chose in preferences.
-      if (!selected.length && words.length) {
-        next.predefined_words.language[subKey] = { selected: [] };
+  const wordToId = {};
+  Object.entries(languageLists).forEach(([subKey, payload]) => {
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    items.forEach((item) => {
+      if (item.word) {
+        wordToId[item.word.toLowerCase()] = item.id;
       }
     });
-  } else {
-    Object.entries(languageLists).forEach(([subKey, payload]) => {
-      const words = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
-      ensurePredefinedSelection(next, 'language', subKey, words);
-    });
-  }
+  });
+
+  const matchedSubfilters = {};
+  const remaining = [];
+
+  blocklistItems.forEach((word) => {
+    const key = word.toLowerCase();
+    const id = wordToId[key];
+    if (id) {
+      Object.entries(languageLists).forEach(([subKey, payload]) => {
+        const items = Array.isArray(payload?.items) ? payload.items : [];
+        if (items.some((item) => item.id === id)) {
+          const entry = matchedSubfilters[subKey] || { selectedIds: [] };
+          if (!entry.selectedIds.includes(id)) {
+            entry.selectedIds.push(id);
+          }
+          matchedSubfilters[subKey] = entry;
+        }
+      });
+    } else {
+      remaining.push(word);
+    }
+  });
+
+  Object.entries(languageLists).forEach(([subKey, payload]) => {
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    const selection = matchedSubfilters[subKey];
+    if (selection) {
+      next.predefined_words.language[subKey] = { selectedIds: selection.selectedIds };
+    } else if (items.length) {
+      next.predefined_words.language[subKey] = { selectedIds: items.map((i) => i.id) };
+    }
+  });
 
   if (remaining.length) {
     next.custom_words.language = remaining;
@@ -1029,12 +1054,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   const filtersPage = document.querySelector('[data-filters-page]');
   if (!filtersPage) return;
 
+  function decodeToken(token) {
+    try {
+      return atob(token);
+    } catch (err) {
+      return '';
+    }
+  }
+
   async function loadWordLibrary() {
     try {
       const res = await fetch(LANGUAGE_WORDLIST_URL);
       if (!res.ok) return;
       const data = await res.json();
-      wordLibrary.language = data.language || {};
+      const language = data.language || {};
+      const mapped = {};
+      Object.entries(language).forEach(([subKey, payload]) => {
+        const rawItems = Array.isArray(payload?.items) ? payload.items : [];
+        const normalized = rawItems.map((item, idx) => {
+          if (typeof item === 'string') {
+            return {
+              id: `${subKey}-${idx}`,
+              token: item,
+              word: decodeToken(item),
+            };
+          }
+          return {
+            id: item.id || `${subKey}-${idx}`,
+            token: item.token || '',
+            word: decodeToken(item.token || ''),
+          };
+        }).map((entry) => ({ ...entry, maskedPreview: maskWordPreservingNonLetters(entry.word) }));
+        mapped[subKey] = { items: normalized };
+      });
+      wordLibrary.language = mapped;
     } catch (err) {
       console.warn('[ISWEEP][FE] Failed to load word library', err);
     }
@@ -1098,6 +1151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function setCurrentCategory(next) {
     currentCategory = next;
+    expandedSubfilterKey = null;
     renderTiles();
     renderCategoryDetail();
   }
@@ -1118,6 +1172,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderSubcategories() {
     if (!subcategoryList) return;
     subcategoryList.innerHTML = '';
+    const customWrap = document.getElementById('customWordsSection');
+    if (customWrap) {
+      customWrap.style.display = currentCategory === 'language' ? 'block' : 'none';
+    }
     const config = FILTER_CATEGORY_CONFIG[currentCategory];
     config.subcategories.forEach((sub) => {
       const row = document.createElement('div');
@@ -1147,17 +1205,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       const badge = document.createElement('span');
       badge.className = 'count-badge';
       const libraryEntry = wordLibrary[currentCategory]?.[sub.key];
-      const words = Array.isArray(libraryEntry?.items) ? libraryEntry.items : Array.isArray(libraryEntry) ? libraryEntry : [];
-      if (currentCategory === 'language' && words.length) {
-        const selection = ensurePredefinedSelection(settings, 'language', sub.key, words);
-        const selectedCount = selection.selected?.length || 0;
-        badge.textContent = `${selectedCount}/${words.length}`;
+      const items = Array.isArray(libraryEntry?.items) ? libraryEntry.items : [];
+      if (currentCategory === 'language' && items.length) {
+        const selection = ensurePredefinedSelection(settings, 'language', sub.key, items);
+        const selectedIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+        badge.textContent = `${selectedIds.length}/${items.length}`;
       } else {
         badge.textContent = sub.count;
       }
       const chevron = document.createElement('span');
       chevron.className = 'chevron';
       chevron.textContent = '›';
+      chevron.classList.toggle('open', expandedSubfilterKey === sub.key);
       right.appendChild(badge);
       right.appendChild(chevron);
 
@@ -1166,6 +1225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       function toggleWordPanel(event) {
         if (event.target instanceof HTMLInputElement) return;
+        if (currentCategory !== 'language') return;
         if (expandedSubfilterKey === sub.key) {
           expandedSubfilterKey = null;
         } else {
@@ -1191,15 +1251,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (expandedSubfilterKey === sub.key) {
         const panel = document.createElement('div');
         panel.className = 'word-panel';
-        if (!words.length) {
+        const helper = document.createElement('p');
+        helper.className = 'muted mask-hint';
+        helper.textContent = 'Words are partially masked for clarity.';
+        panel.appendChild(helper);
+
+        const itemsForSub = items;
+        if (!itemsForSub.length) {
           const empty = document.createElement('p');
           empty.className = 'empty-hint';
-          empty.textContent = 'No predefined words available for this subfilter.';
+          empty.textContent = 'No predefined items for this subfilter.';
           panel.appendChild(empty);
         } else {
-          const selection = ensurePredefinedSelection(settings, 'language', sub.key, words);
-          const selectedSet = new Set(selection.selected || []);
-          words.forEach((word) => {
+          const selection = ensurePredefinedSelection(settings, 'language', sub.key, itemsForSub);
+          const selectedIds = new Set(selection.selectedIds || []);
+          itemsForSub.forEach((item) => {
             const rowEl = document.createElement('div');
             rowEl.className = 'sub-row word-row';
 
@@ -1207,11 +1273,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             label.className = 'sub-row-left';
             const wordCheckbox = document.createElement('input');
             wordCheckbox.type = 'checkbox';
-            wordCheckbox.checked = selectedSet.has(word);
-            wordCheckbox.setAttribute('data-word', word);
+            wordCheckbox.checked = selectedIds.has(item.id);
+            wordCheckbox.setAttribute('data-word-id', item.id);
 
             const masked = document.createElement('span');
-            masked.textContent = maskTokenForDisplay(word);
+            masked.textContent = item.maskedPreview;
 
             label.appendChild(wordCheckbox);
             label.appendChild(masked);
@@ -1219,20 +1285,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             wordCheckbox.addEventListener('change', () => {
               if (wordCheckbox.checked) {
-                selectedSet.add(word);
+                selectedIds.add(item.id);
               } else {
-                selectedSet.delete(word);
+                selectedIds.delete(item.id);
               }
-              settings.predefined_words.language[sub.key] = { selected: Array.from(selectedSet) };
+              settings.predefined_words.language[sub.key] = { selectedIds: Array.from(selectedIds) };
               renderSubcategories();
             });
 
             panel.appendChild(rowEl);
           });
         }
+
+        if (currentCategory === 'language') {
+          const customSection = document.createElement('div');
+          customSection.className = 'custom-words-inline';
+          const heading = document.createElement('p');
+          heading.className = 'eyebrow';
+          heading.textContent = 'Manage Custom Words';
+          customSection.appendChild(heading);
+          if (customWrap) {
+            customWrap.style.marginTop = '8px';
+            customWrap.style.borderTop = '1px solid var(--border)';
+            customWrap.style.paddingTop = '8px';
+            customSection.appendChild(customWrap);
+          }
+          panel.appendChild(customSection);
+        }
+
         subcategoryList.appendChild(panel);
       }
     });
+
+    if (currentCategory === 'language' && !expandedSubfilterKey && customWrap) {
+      subcategoryList.insertAdjacentElement('afterend', customWrap);
+    }
   }
 
   function renderCustomWords() {
