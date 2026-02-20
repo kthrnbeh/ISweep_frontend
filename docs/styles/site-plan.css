@@ -194,7 +194,7 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
 .kb-wrapper{position:relative;}
 .kb-avatar{
   width:36px; height:36px; border-radius:999px;
-  background:#14B8A6; color:#fff; border:none;
+  background:#30C3D9; color:#fff; border:none;
   display:inline-flex; align-items:center; justify-content:center;
   font-weight:700; cursor:pointer;
 }
