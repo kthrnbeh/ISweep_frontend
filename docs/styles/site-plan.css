@@ -211,7 +211,6 @@ body.dark .step-card{background:#0f172a; border-color:#1f2937}
   display:block; width:100%; text-align:left;
   padding:9px 10px; border-radius:10px;
   border:1px solid #e5e7eb; background:#ffffff;
-    background: #30C3D9;
 }
 .hidden{display:none !important;}
 
