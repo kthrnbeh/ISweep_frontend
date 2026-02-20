@@ -967,6 +967,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resetButton = document.getElementById('resetCategory');
   const cancelButton = document.getElementById('cancelFilters');
 
+  function applyKidPreset() {
+    Object.keys(settings.filters_enabled).forEach((categoryKey) => {
+      settings.filters_enabled[categoryKey] = true;
+
+      if (settings.subfilters_enabled && settings.subfilters_enabled[categoryKey]) {
+        Object.keys(settings.subfilters_enabled[categoryKey]).forEach((subKey) => {
+          settings.subfilters_enabled[categoryKey][subKey] = true;
+        });
+      }
+
+      settings.actions[categoryKey] = {
+        action: categoryKey === 'language' ? 'mute' : 'skip',
+        duration: 15,
+        sensitivity: 5,
+      };
+    });
+
+    saveSettingsToStorage(settings);
+    renderTiles();
+    renderCategoryDetail();
+  }
+
+  const presetButtons = filtersPage.querySelectorAll('.preset-buttons button');
+  presetButtons.forEach((btn) => {
+    const label = (btn.textContent || '').trim();
+    if (label === 'Kid Mode (Under 13)') {
+      btn.addEventListener('click', applyKidPreset);
+    }
+  });
+
   function setCurrentCategory(next) {
     currentCategory = next;
     renderTiles();
