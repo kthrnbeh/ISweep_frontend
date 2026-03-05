@@ -1,3 +1,14 @@
+/**
+ * ISWEEP COMPONENT: Frontend demo logic for settings, auth, and plan selection.
+ *
+ * This script powers the static docs site: toggles themes, simulates auth, reads/writes
+ * preferences, and exercises backend endpoints for login/signup/preferences. It shares
+ * token keys with the extension bridge so the same token can be reused by the Chrome extension.
+ *
+ * System connection:
+ *   Docs UI -> fetch auth/preferences -> backend (http://127.0.0.1:5000) -> store token in localStorage
+ *   Token is reused by the extension to call /event while watching captions.
+ */
 const CURRENT_PLAN_KEY = "currentPlan"; // Stores the selected plan in localStorage so plan info persists.
 const SETTINGS_KEY = "isweep-settings"; // Stores settings payloads in localStorage for the settings page demo.
 const themePreferenceKey = 'isweep-theme'; // Stores the user’s theme preference so it survives reloads.
@@ -125,6 +136,7 @@ function setKbAvatarInitials(state) { // Sync header avatar text with stored aut
   avatars.forEach((el) => { el.textContent = initials || 'KB'; });
 }
 
+// Resolve backend base URL so login/preferences calls know where to send requests.
 function getBackendUrl() {
   const override = localStorage.getItem(backendUrlKey);
   return override || BACKEND_DEFAULT;
@@ -181,6 +193,7 @@ function syncAuthUI() { // Updates dropdown and modal content based on auth stat
   setKbAvatarInitials(state); // Keep header avatar in sync with auth identity.
 }
 
+// Shared helper for signup/login calls; returns parsed JSON or throws on failure.
 async function callAuthEndpoint(path, payload) {
   const res = await fetch(`${getBackendUrl()}/auth/${path}`, {
     method: 'POST',
@@ -195,6 +208,7 @@ async function callAuthEndpoint(path, payload) {
   return res.json();
 }
 
+// Cache auth/session locally so UI and extension can reuse the same token.
 function persistSession({ token, userId, email, name, initials }) {
   localStorage.setItem(tokenStorageKey, token);
   localStorage.setItem(TOKEN_KEY, token);
